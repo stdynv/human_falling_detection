@@ -123,7 +123,7 @@ while True:
             previous_positions.append(current_position)
 
             # Ignorer les chutes quand la personne est trop proche
-            if area > 40000:
+            if area > 120000:
                 cvzone.putTextRect(frame, "Person too close, ignoring fall", (x1, y1 - 60), 1, 1, colorR=(0, 0, 255))
                 continue
 
