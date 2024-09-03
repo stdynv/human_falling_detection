@@ -1,3 +1,4 @@
+from picamera2 import Picamera2
 import cv2
 from ultralytics import YOLO
 import pandas as pd
@@ -26,14 +27,12 @@ mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(static_image_mode=False, model_complexity=1, enable_segmentation=False, min_detection_confidence=0.5)
 mp_drawing = mp.solutions.drawing_utils
 
-# Initialiser la capture vidéo depuis la webcam avec une résolution plus faible pour alléger la charge
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-cap.set(cv2.CAP_PROP_FPS, 10)  # Limiter le FPS pour réduire la charge
+# Initialiser la caméra Picamera2
+picam2 = Picamera2()
+picam2.start()
 
 # Définir les paramètres pour l'enregistrement des séquences
-fps = cap.get(cv2.CAP_PROP_FPS)
+fps = 10  # Limiter le FPS pour réduire la charge
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
 # File pour garder les frames avant la chute (5 secondes avant)
@@ -60,15 +59,13 @@ cooldown_time = 5  # Temps de cooldown en secondes
 last_fall_time = 0  # Dernière chute détectée
 
 while True:
-    ret, frame = cap.read()
+    # Capture de l'image depuis Picamera2
+    frame = picam2.capture_array()
     count += 1
 
     # Traiter seulement une frame sur trois pour alléger la charge
     if count % 3 != 0:
         continue
-
-    if not ret:
-        break
 
     frame = cv2.resize(frame, (640, 480))  # Utiliser une résolution plus basse pour alléger le traitement
     frame_for_recording = frame.copy()  # Copie pour l'enregistrement sans annotations
@@ -182,5 +179,5 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-cap.release()
+picam2.stop()
 cv2.destroyAllWindows()
