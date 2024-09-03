@@ -50,3 +50,6 @@ def create_incident():
     return jsonify({'message': 'Incident recorded successfully'}), 201
 
 # real time avec socketio : communication RT avec frontend
+
+
+

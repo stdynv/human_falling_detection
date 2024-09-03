@@ -20,7 +20,7 @@ def get_next_id(items):
 def create_room():
     data = request.get_json()
     room = {
-        'id': get_next_id(rooms),
+        'room_id': get_next_id(rooms),
         'room_number': data.get('room_number'),
         'floor': data.get('floor'),
         'type': data.get('type'),
