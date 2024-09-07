@@ -6,13 +6,14 @@ rooms = []
 
 def find_item(items, item_id):
     for item in items:
-        if item['id'] == item_id:
+        if item['room_id'] == item_id:
             return item
     return None
 
+
 def get_next_id(items):
     if items:
-        return max(item['id'] for item in items) + 1
+        return max(item['room_id'] for item in items) + 1
     else:
         return 1
 
@@ -40,6 +41,7 @@ def get_room(room_id):
     if room:
         return jsonify(room), 200
     return jsonify({'error': 'Room not found'}), 404
+
 
 @rooms_bp.route('/<int:room_id>', methods=['PUT'])
 def update_room(room_id):
