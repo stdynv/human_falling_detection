@@ -13,10 +13,10 @@ class Config:
     DB_USERNAME = os.getenv('DB_USERNAME')
     DB_PASSWORD = os.getenv('DB_PASSWORD')"""
 
-    DB_SERVER=ehpadserver.database.windows.net
-    DB_DATABASE=ehpad
-    DB_USERNAME=ehpad-admin
-    DB_PASSWORD=Memoire2024!
+    DB_SERVER="ehpadserver.database.windows.net"
+    DB_DATABASE="ehpad"
+    DB_USERNAME="ehpad-admin"
+    DB_PASSWORD="Memoire2024!"
 
     
     
