@@ -18,7 +18,7 @@ class Config:
     # Connection String for SQL Server
     SQLALCHEMY_DATABASE_URI = (
     f"mssql+pyodbc://{DB_USERNAME}:{DB_PASSWORD}@{DB_SERVER}:1433/{DB_DATABASE}"
-    "?driver=ODBC+Driver+17+for+SQL+Server"
+    "?driver=ODBC+Driver+18+for+SQL+Server"
     "&Encrypt=yes"
     "&TrustServerCertificate=no"
     "&Connection Timeout=30"
