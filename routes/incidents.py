@@ -29,7 +29,7 @@ def get_incidents():
     conn.close()
     return jsonify(incidents)
 
-@incidents_bp.route('/', methods=['POST'])
+@incidents_bp.route('/create', methods=['POST'])
 
 def create_incident():
     try:
