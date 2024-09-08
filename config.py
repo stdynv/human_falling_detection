@@ -8,10 +8,15 @@ class Config:
     DEBUG = os.getenv('DEBUG', True)
 
     # Database Configuration
-    DB_SERVER = os.getenv('DB_SERVER')
+    """DB_SERVER = os.getenv('DB_SERVER')
     DB_DATABASE = os.getenv('DB_DATABASE')
     DB_USERNAME = os.getenv('DB_USERNAME')
-    DB_PASSWORD = os.getenv('DB_PASSWORD')
+    DB_PASSWORD = os.getenv('DB_PASSWORD')"""
+
+    DB_SERVER=ehpadserver.database.windows.net
+    DB_DATABASE=ehpad
+    DB_USERNAME=ehpad-admin
+    DB_PASSWORD=Memoire2024!
 
     
     
