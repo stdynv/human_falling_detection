@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request
-import logging
 # # from flask_socketio import SocketIO, emit
 from config import Config
 from datetime import datetime
@@ -36,16 +35,16 @@ def create_incident():
     try:
         conn = Config.get_db_connection()
         if conn is None:
-            logging.error('Database connection failed.')
+            # logging.error('Database connection failed.')
             return jsonify({'error': 'Database connection failed'}), 500
         
         # Log the incoming data for debugging
         data = request.json
-        logging.info(f"Data received: {data}")
+        # logging.info(f"Data received: {data}")
         
         # Ensure the required keys are present in the incoming JSON
         if not all(key in data for key in ['raspberry_id', 'description', 'video_url', 'status']):
-            logging.error('Missing fields in the request data.')
+            # logging.error('Missing fields in the request data.')
             return jsonify({'error': 'Missing fields in the request data'}), 400
         
         sql = """INSERT INTO Incidents (raspberry_id, incident_date, description, video_url, status)
@@ -56,7 +55,7 @@ def create_incident():
         )
         
         # Log the SQL query for debugging
-        logging.info(f"Executing SQL: {sql} with values {values}")
+        # logging.info(f"Executing SQL: {sql} with values {values}")
         
         cursor = conn.cursor()
         cursor.execute(sql, values)
@@ -67,7 +66,7 @@ def create_incident():
         return jsonify({'message': 'Incident recorded successfully'}), 201
 
     except Exception as e:
-        logging.error(f"Error occurred: {e}")
+        # logging.error(f"Error occurred: {e}")
         return jsonify({'error': 'An error occurred'}), 500
 
 
