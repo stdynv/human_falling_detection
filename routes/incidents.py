@@ -10,8 +10,6 @@ def get_incidents():
     conn = Config.get_db_connection()
     if conn is None:
         return jsonify({"error": "Database connection failed"}), 500
-
-    data = request.get_json()
     
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Incidents ORDER BY incident_date DESC")
@@ -39,7 +37,7 @@ def create_incident():
         if conn is None:
             # logging.error('Database connection failed.')
             return jsonify({'error': 'Database connection failed'}), 500
-    
+        data = request.get_json()
         sql = """INSERT INTO Incidents (raspberry_id, incident_date, description, video_url, status)
                  VALUES (?, ?, ?, ?, ?)"""
         values = (
