@@ -11,7 +11,7 @@ def get_incidents():
     if conn is None:
         return jsonify({"error": "Database connection failed"}), 500
 
-    data = request.json
+    data = request.get_json()
     
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Incidents ORDER BY incident_date DESC")
