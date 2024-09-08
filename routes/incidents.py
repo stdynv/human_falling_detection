@@ -3,6 +3,8 @@ import logging
 from config import Config
 from datetime import datetime
 
+local_tz = pytz.timezone('Europe/Paris')
+
 incidents_bp = Blueprint('incidents_bp', __name__)
 
 @incidents_bp.route('/', methods=['GET'])
@@ -41,7 +43,7 @@ def create_incident():
         sql = """INSERT INTO Incidents (raspberry_id, incident_date, description, video_url, status)
                  VALUES (?, ?, ?, ?, ?)"""
         values = (
-            data['raspberry_id'], datetime.now(),
+            data['raspberry_id'], datetime.now(local_tz),
             data['description'], data['video_url'], data['status']
         )
         
