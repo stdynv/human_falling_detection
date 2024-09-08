@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 class Config:
     # General Configurations
-    DEBUG = os.getenv('DEBUG', True)
+    # DEBUG = os.getenv('DEBUG', True)
 
     # Database Configuration
     """DB_SERVER = os.getenv('DB_SERVER')
