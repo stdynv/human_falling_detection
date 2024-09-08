@@ -19,6 +19,7 @@ Flask==3.0.3
 Flask-Cors==4.0.1
 frozenlist==1.4.1
 idna==3.8
+pytz==2023.3
 isodate==0.6.1
 itsdangerous==2.2.0
 Jinja2==3.1.4
