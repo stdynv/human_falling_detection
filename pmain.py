@@ -25,7 +25,6 @@ logging.basicConfig(level=logging.DEBUG)
 model = YOLO("yolov8n.pt")
 logging.getLogger('ultralytics').setLevel(logging.ERROR)
 
-
 # Initialize class list from coco.txt
 with open("coco.txt", "r") as file:
     class_list = file.read().split("\n")
@@ -65,8 +64,10 @@ room_number = 49
 cooldown_time = 5
 last_fall_time = 0
 
-# API URL for uploading videos
+# API URL for uploading videos and incident reporting
 upload_url = "https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/api/azure/upload"  # Replace with your Flask API URL
+incident_url = 'https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/api/incidents/create'
+
 
 while True:
     ret, frame = cap.read()
@@ -204,18 +205,36 @@ while True:
             
             if os.path.exists(video_file_name):
                 try:
-                    # Open the file in binary mode, just like Postman does
+                    # Open the file in binary mode
                     with open(video_file_name, 'rb') as video_file:
                         files = {'video': (video_file_name, video_file, 'video/mp4')}
                         
                         # Make the POST request to upload the file
                         response = requests.post(upload_url, files=files)
 
-                        # Check the response
+                        # Check the response for the SAS URL of the uploaded video
                         if response.status_code == 200:
                             logging.info("Video uploaded successfully.")
                             logging.info("SAS URL: %s", response.json().get("sas_url"))
                             sas_url = response.json().get("sas_url")
+
+                            # Prepare the JSON data to be sent to the incidents API
+                            incident_data = {
+                                'raspberry_id': 'RPI12345',
+                                'incident_date': fall_time,
+                                'description': 'Fall detected in room number ' + str(room_number),
+                                'video_url': sas_url,
+                                'status': 'pending'
+                            }
+
+                            # Send the POST request to the incidents API
+                            incident_response = requests.post(incident_url, json=incident_data)
+
+                            if incident_response.status_code == 201:
+                                logging.info("Incident reported successfully.")
+                            else:
+                                logging.error(f"Failed to report incident. Status code: {incident_response.status_code}")
+                                logging.error(f"Error message: {incident_response.text}")
                         else:
                             logging.error(f"Failed to upload video. Status code: {response.status_code}")
                             logging.error("Error: %s", response.text)
