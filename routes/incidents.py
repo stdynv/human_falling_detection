@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+import loggings
 # # from flask_socketio import SocketIO, emit
 from config import Config
 from datetime import datetime
@@ -32,24 +33,41 @@ def get_incidents():
 @incidents_bp.route('/', methods=['POST'])
 
 def create_incident():
-    conn = Config.get_db_connection()
-    data = request.json
-    sql = """INSERT INTO Incidents (raspberry_id, incident_date, description, video_url,status)
-             VALUES (?, ?, ?, ?, ?)"""
-    
-    values = (
-        data['raspberry_id'], datetime.now(), 
-        data['description'], data['video_url'],data['status']
-    )
+    try:
+        conn = Config.get_db_connection()
+        if conn is None:
+            logging.error('Database connection failed.')
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        # Log the incoming data for debugging
+        data = request.json
+        logging.info(f"Data received: {data}")
+        
+        # Ensure the required keys are present in the incoming JSON
+        if not all(key in data for key in ['raspberry_id', 'description', 'video_url', 'status']):
+            logging.error('Missing fields in the request data.')
+            return jsonify({'error': 'Missing fields in the request data'}), 400
+        
+        sql = """INSERT INTO Incidents (raspberry_id, incident_date, description, video_url, status)
+                 VALUES (?, ?, ?, ?, ?)"""
+        values = (
+            data['raspberry_id'], datetime.now(),
+            data['description'], data['video_url'], data['status']
+        )
+        
+        # Log the SQL query for debugging
+        logging.info(f"Executing SQL: {sql} with values {values}")
+        
+        cursor = conn.cursor()
+        cursor.execute(sql, values)
+        conn.commit()
+        cursor.close()
+        conn.close()
 
-    cursor = conn.cursor()
-    cursor.execute(sql, values)
-    conn.commit()
-    conn.close()
-    
-    return jsonify({'message': 'Incident recorded successfully'}), 201
+        return jsonify({'message': 'Incident recorded successfully'}), 201
 
-# real time avec socketio : communication RT avec frontend
-
+    except Exception as e:
+        logging.error(f"Error occurred: {e}")
+        return jsonify({'error': 'An error occurred'}), 500
 
 
