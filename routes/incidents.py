@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-import loggings
+import logging
 # # from flask_socketio import SocketIO, emit
 from config import Config
 from datetime import datetime
