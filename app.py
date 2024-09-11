@@ -1,8 +1,8 @@
 from flask import Flask, render_template_string
-from flask_sqlalchemy import SQLAlchemy
+# from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from extensions import db
-from sqlalchemy import text
+# from extensions import db
+# from sqlalchemy import text
 
 app = Flask(__name__)
 
