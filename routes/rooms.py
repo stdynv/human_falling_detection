@@ -1,6 +1,6 @@
-from flask import Blueprint, request, jsonify
-from extensions import db
-from models import Room  
+"""from flask import Blueprint, request, jsonify
+#from extensions import db
+# from models import Room  
 
 rooms_bp = Blueprint('rooms_bp', __name__)
     
@@ -60,3 +60,4 @@ def delete_room(room_id):
     db.session.delete(room)
     db.session.commit()
     return jsonify({'message': 'Room deleted'}), 200
+"""
