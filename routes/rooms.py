@@ -4,7 +4,12 @@ from models import Room
 
 rooms_bp = Blueprint('rooms_bp', __name__)
     
-@rooms_bp.route('/create', methods=['POST'])
+@rooms_bp.route('/',methods=['GET'])
+def get_rooms():
+    return 'room page'
+
+
+"""@rooms_bp.route('/create', methods=['POST'])
 def create_room():
     data = request.get_json()
     new_room = Room(
@@ -59,4 +64,4 @@ def delete_room(room_id):
     room = Room.query.get_or_404(room_id)
     db.session.delete(room)
     db.session.commit()
-    return jsonify({'message': 'Room deleted'}), 200
+    return jsonify({'message': 'Room deleted'}), 200"""
