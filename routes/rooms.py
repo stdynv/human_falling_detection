@@ -49,7 +49,7 @@ def create_room():
             data['room_number'], 
             data['floor'], 
             data['type'], 
-            data['occupied'], 
+            0, 
             data['raspberry_id']
         )
         
