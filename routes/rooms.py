@@ -16,11 +16,11 @@ def get_rooms():
     rooms = []
     for row in cursor.fetchall():
         rooms.append({
-            'raspberry_id': row.raspberry_id,
-            'incident_date': row.incident_date,
-            'description': row.description,
-            'video_url': row.video_url,
-            'status' : row.status
+            'room_id': row.room_id,
+            'room_number': row.room_number,
+            'floor': row.floor,
+            'occupied': row.occupied,
+            'raspberry_id' : row.raspberry_id
         })
 
     # emit('notifications',incidents)
