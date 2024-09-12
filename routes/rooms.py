@@ -29,6 +29,62 @@ def get_rooms():
     return jsonify(rooms)
 
 
+@rooms_bp.route('/<int:room_id>', methods=['GET'])
+def get_rooms():
+    conn = Config.get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Rooms where raspraspberry_id = ?")
+    
+    rooms = []
+    for row in cursor.fetchall():
+        rooms.append({
+            'room_id': row.room_id,
+            'room_number': row.room_number,
+            'floor': row.floor,
+            'occupied': row.occupied,
+            'raspberry_id' : row.raspberry_id
+        })
+
+    # emit('notifications',incidents)
+    
+    conn.close()
+    return jsonify(rooms)
+    
+@rooms_bp.route('/create', methods=['POST'])
+def create_room():
+    data = request.get_json()
+    
+    # Récupérer les données du JSON
+    room_number = data['room_number']
+    floor = data['floor']
+    room_type = data['type']
+    occupied = data['occupied']
+    raspberry_id = data['raspberry_id']
+    
+    # Connexion à la base de données
+    conn = Config.get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    cursor = conn.cursor()
+    
+    # Exécution de la requête SQL pour insérer une nouvelle salle
+    cursor.execute(
+        '''
+        INSERT INTO rooms (room_number, floor, type, occupied, raspberry_id)
+        VALUES (?, ?, ?, ?, ?)
+        ''', (room_number, floor, room_type, occupied, raspberry_id)
+    )
+    
+    # Valider les changements et fermer la connexion
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'message': 'Room created'}), 201
+
 """@rooms_bp.route('/create', methods=['POST'])
 def create_room():
     data = request.get_json()
