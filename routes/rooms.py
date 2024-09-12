@@ -4,9 +4,18 @@ from models import Room
 
 rooms_bp = Blueprint('rooms_bp', __name__)
     
-@rooms_bp.route('/',methods=['GET'])
+
+@rooms_bp.route('/', methods=['GET'])
 def get_rooms():
-    return 'room page'
+    rooms = Room.query.all()
+    return jsonify([{
+        'room_id': room.room_id,
+        'room_number': room.room_number,
+        'floor': room.floor,
+        'type': room.type,
+        'occupied': room.occupied,
+        'raspberry_id': room.raspberry_id
+    } for room in rooms]), 200
 
 
 """@rooms_bp.route('/create', methods=['POST'])
