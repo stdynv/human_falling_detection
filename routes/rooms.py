@@ -41,22 +41,27 @@ def get_room(room_id):
         'occupied': room.occupied,
         'raspberry_id': room.raspberry_id
     }), 200
-
-@rooms_bp.route('/<int:room_id>', methods=['PUT'])
-def update_room(room_id):
-    room = Room.query.get_or_404(room_id)
+# UPDATE ROOM BY ROOM NUMBER
+@rooms_bp.route('/<string:room_number>', methods=['PUT'])
+def update_room_by_number(room_number):
+    room = Room.query.filter_by(room_number=room_number).first_or_404()
     data = request.get_json()
     room.room_number = data.get('room_number', room.room_number)
     room.floor = data.get('floor', room.floor)
     room.type = data.get('type', room.type)
     room.occupied = data.get('occupied', room.occupied)
     room.raspberry_id = data.get('raspberry_id', room.raspberry_id)
+    
     db.session.commit()
-    return jsonify({'message': 'Room updated'}), 200
+    
+    return jsonify({'message': 'Room updated'}), 201
 
-@rooms_bp.route('/<int:room_id>', methods=['DELETE'])
-def delete_room(room_id):
-    room = Room.query.get_or_404(room_id)
+# delete room 
+@rooms_bp.route('/<string:room_number>', methods=['DELETE'])
+def delete_room_by_number(room_number):
+    room = Room.query.filter_by(room_number=room_number).first_or_404()
+    
     db.session.delete(room)
     db.session.commit()
+    
     return jsonify({'message': 'Room deleted'}), 200
