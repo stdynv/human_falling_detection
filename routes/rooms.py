@@ -28,31 +28,6 @@ def get_rooms():
     conn.close()
     return jsonify(rooms)
 
-
-@rooms_bp.route('/<int:room_id>', methods=['GET'])
-def get_rooms():
-    conn = Config.get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Rooms where raspraspberry_id = ?")
-    
-    rooms = []
-    for row in cursor.fetchall():
-        rooms.append({
-            'room_id': row.room_id,
-            'room_number': row.room_number,
-            'floor': row.floor,
-            'occupied': row.occupied,
-            'raspberry_id' : row.raspberry_id
-        })
-
-    # emit('notifications',incidents)
-    
-    conn.close()
-    return jsonify(rooms)
-    
 @rooms_bp.route('/create', methods=['POST'])
 def create_room():
     data = request.get_json()
