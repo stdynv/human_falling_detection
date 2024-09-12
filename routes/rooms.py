@@ -30,35 +30,48 @@ def get_rooms():
 
 @rooms_bp.route('/create', methods=['POST'])
 def create_room():
-    data = request.get_json()
-    
-    # Récupérer les données du JSON
-    room_number = data['room_number']
-    floor = data['floor']
-    room_type = data['type']
-    occupied = data['occupied']
-    raspberry_id = data['raspberry_id']
-    
-    # Connexion à la base de données
-    conn = Config.get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    cursor = conn.cursor()
-    
-    # Exécution de la requête SQL pour insérer une nouvelle salle
-    cursor.execute(
-        '''
-        INSERT INTO rooms (room_number, floor, type, occupied, raspberry_id)
-        VALUES (?, ?, ?, ?, ?)
-        ''', (room_number, floor, room_type, occupied, raspberry_id)
-    )
-    
-    # Valider les changements et fermer la connexion
-    conn.commit()
-    conn.close()
-    
-    return jsonify({'message': 'Room created'}), 201
+    try:
+        # Obtenir la connexion à la base de données
+        conn = Config.get_db_connection()  # Remplacer par ta méthode de connexion à la DB
+        if conn is None:
+            # logging.error('Database connection failed.')
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        # Récupérer les données de la requête
+        data = request.get_json()
+        
+        # Définir la requête SQL
+        sql = """INSERT INTO rooms (room_number, floor, type, occupied, raspberry_id)
+                 VALUES (?, ?, ?, ?, ?)"""
+        
+        # Définir les valeurs de la requête
+        values = (
+            data['room_number'], 
+            data['floor'], 
+            data['type'], 
+            data['occupied'], 
+            data['raspberry_id']
+        )
+        
+        # Log la requête SQL pour le débogage
+        logging.info(f"Executing SQL: {sql} with values {values}")
+        
+        # Exécuter la requête SQL
+        cursor = conn.cursor()
+        cursor.execute(sql, values)
+        conn.commit()
+        
+        # Fermer le curseur et la connexion
+        cursor.close()
+        conn.close()
+
+        # Retourner un message de succès
+        return jsonify({'message': 'Room created successfully'}), 201
+
+    except Exception as e:
+        # Log en cas d'erreur
+        logging.error(f"Error occurred: {e}")
+        return jsonify({'error': 'An error occurred'}), 500
 
 """@rooms_bp.route('/create', methods=['POST'])
 def create_room():
