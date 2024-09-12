@@ -7,15 +7,27 @@ rooms_bp = Blueprint('rooms_bp', __name__)
 
 @rooms_bp.route('/', methods=['GET'])
 def get_rooms():
-    rooms = Room.query.all()
-    return jsonify([{
-        'room_id': room.room_id,
-        'room_number': room.room_number,
-        'floor': room.floor,
-        'type': room.type,
-        'occupied': room.occupied,
-        'raspberry_id': room.raspberry_id
-    } for room in rooms]), 200
+    conn = Config.get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Rooms")
+    
+    rooms = []
+    for row in cursor.fetchall():
+        rooms.append({
+            'raspberry_id': row.raspberry_id,
+            'incident_date': row.incident_date,
+            'description': row.description,
+            'video_url': row.video_url,
+            'status' : row.status
+        })
+
+    # emit('notifications',incidents)
+    
+    conn.close()
+    return jsonify(rooms)
 
 
 """@rooms_bp.route('/create', methods=['POST'])
