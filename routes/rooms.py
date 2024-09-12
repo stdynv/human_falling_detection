@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
-from extensions import db
-from models import Room  
+from config import Config  
 
 rooms_bp = Blueprint('rooms_bp', __name__)
     
