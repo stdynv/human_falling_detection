@@ -18,6 +18,8 @@ def get_incidents():
     cursor.execute("SELECT * FROM Incidents ORDER BY incident_date DESC")
     
     incidents = []
+
+    
     for row in cursor.fetchall():
         incidents.append({
             'raspberry_id': row.raspberry_id,
