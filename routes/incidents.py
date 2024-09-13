@@ -12,10 +12,7 @@ incidents_bp = Blueprint('incidents_bp', __name__)
 @incidents_bp.route('/create', methods=['POST'])
 def create_incident():
     try:
-        # Fetch JSON data from the request
         data = request.get_json()
-
-        # Create a new incident record
         incident_date = datetime.now()
         new_incident = Incident(
             raspberry_id=data['raspberry_id'],
@@ -25,14 +22,14 @@ def create_incident():
             status=data['status']
         )
 
-        # Add and commit the new incident to the database
         db.session.add(new_incident)
         db.session.commit()
 
-        # Log the incident creation
+        # Log the new incident creation and event emission
         logging.info(f"New incident created: {new_incident.description}")
+        logging.info(f"Emitting new incident: {new_incident.incident_id}")
 
-        # Emit the new incident data to all connected clients using WebSocket
+        # Emit the new incident event
         socketio.emit('new_incident', {
             'incident_id': new_incident.incident_id,
             'raspberry_id': new_incident.raspberry_id,

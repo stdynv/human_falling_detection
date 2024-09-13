@@ -28,7 +28,7 @@
 
         // Listen for a "new_incident" event
         socket.on('new_incident', function(data) {
-            console.log('New incident received:', data);
+            console.log('New incident received:',data);
             document.getElementById('message').innerText = 'New incident: ' + JSON.stringify(data);
         });
 

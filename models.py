@@ -13,6 +13,7 @@ class Room(db.Model):
     raspberry_id = db.Column(db.String(100))
 
 class Incident(db.Model):
+    __tablename__ = 'Incidents'
     incident_id = db.Column(db.Integer, primary_key=True)
     raspberry_id = db.Column(db.String(50))
     incident_date = db.Column(db.DateTime, default=datetime.datetime.now())
