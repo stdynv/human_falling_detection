@@ -30,7 +30,7 @@ app.register_blueprint(incidents_bp, url_prefix='/api/incidents')
 app.register_blueprint(azure_bp, url_prefix='/api/azure')
 app.register_blueprint(staff_bp, url_prefix='/api/staff')
 
-@app.route('/')
+@app.route('/documentation')
 def home():
     html = """
     <html>
@@ -70,7 +70,7 @@ def test_db():
     except Exception as e:
         return f"Error connecting to the database: {e}", 500
 
-@app.route('/test_socket')
+@app.route('/')
 def test_socket():
     return render_template('main.html')
 
