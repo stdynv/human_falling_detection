@@ -1,68 +1,49 @@
 from flask import Blueprint, jsonify, request
 import logging
-import pytz
-from config import Config
+from flask_socketio import emit
 from datetime import datetime
+from models import Incident
+from extensions import db, socketio  # Import socketio
 
-local_tz = pytz.timezone('Europe/Paris')
-
+# Create the Blueprint for incidents
 incidents_bp = Blueprint('incidents_bp', __name__)
 
-@incidents_bp.route('/', methods=['GET'])
-def get_incidents():
-    conn = Config.get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Incidents ORDER BY incident_date DESC")
-    
-    incidents = []
-
-    
-    for row in cursor.fetchall():
-        incidents.append({
-            'raspberry_id': row.raspberry_id,
-            'incident_date': row.incident_date,
-            'description': row.description,
-            'video_url': row.video_url,
-            'status' : row.status
-        })
-
-    # emit('notifications',incidents)
-    
-    conn.close()
-    return jsonify(incidents)
-
+# Route for creating an incident
 @incidents_bp.route('/create', methods=['POST'])
-
 def create_incident():
     try:
-        conn = Config.get_db_connection()
-        if conn is None:
-            # logging.error('Database connection failed.')
-            return jsonify({'error': 'Database connection failed'}), 500
+        # Fetch JSON data from the request
         data = request.get_json()
-        sql = """INSERT INTO Incidents (raspberry_id, incident_date, description, video_url, status)
-                 VALUES (?, ?, ?, ?, ?)"""
-        values = (
-            data['raspberry_id'], datetime.now(local_tz),
-            data['description'], data['video_url'], data['status']
-        )
-        
-        # Log the SQL query for debugging
-        logging.info(f"Executing SQL: {sql} with values {values}")
-        
-        cursor = conn.cursor()
-        cursor.execute(sql, values)
-        conn.commit()
-        cursor.close()
-        conn.close()
 
-        return jsonify({'message': 'Incident recorded successfully'}), 201
+        # Create a new incident record
+        incident_date = datetime.now()
+        new_incident = Incident(
+            raspberry_id=data['raspberry_id'],
+            incident_date=incident_date,
+            description=data['description'],
+            video_url=data['video_url'],
+            status=data['status']
+        )
+
+        # Add and commit the new incident to the database
+        db.session.add(new_incident)
+        db.session.commit()
+
+        # Log the incident creation
+        logging.info(f"New incident created: {new_incident.description}")
+
+        # Emit the new incident data to all connected clients using WebSocket
+        socketio.emit('new_incident', {
+            'incident_id': new_incident.incident_id,
+            'raspberry_id': new_incident.raspberry_id,
+            'incident_date': new_incident.incident_date.isoformat(),
+            'description': new_incident.description,
+            'video_url': new_incident.video_url,
+            'status': new_incident.status
+        })
+
+        return jsonify({'message': 'Incident created successfully'}), 201
 
     except Exception as e:
-        logging.error(f"Error occurred: {e}")
-        return jsonify({'error': 'An error occurred'}), 500
-
-
+        logging.error(f"Error while creating an incident: {e}")
+        return jsonify({'error': 'An error occurred while creating the incident'}), 500

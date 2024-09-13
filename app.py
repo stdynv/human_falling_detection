@@ -1,7 +1,7 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string,render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from extensions import db
+from extensions import db, socketio  # Import socketio from extensions
 from sqlalchemy import text
 
 app = Flask(__name__)
@@ -12,8 +12,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Initialize extensions
 db.init_app(app)
-CORS(app)
+socketio.init_app(app,cors_allowed_origins="*")  # Initialize SocketIO with the app
+CORS(app,supports_credentials=True)
+
 
 # Import the Blueprints from the routes
 from routes.rooms import rooms_bp
@@ -26,7 +29,6 @@ app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
 app.register_blueprint(incidents_bp, url_prefix='/api/incidents')
 app.register_blueprint(azure_bp, url_prefix='/api/azure')
 app.register_blueprint(staff_bp, url_prefix='/api/staff')
-
 
 @app.route('/')
 def home():
@@ -68,5 +70,10 @@ def test_db():
     except Exception as e:
         return f"Error connecting to the database: {e}", 500
 
+@app.route('/test_socket')
+def test_socket():
+    return render_template('main.html')
+
+# Run the app using SocketIO instead of app.run
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True, port=8000)
