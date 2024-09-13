@@ -14,7 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
 db.init_app(app)
-socketio.init_app(app,cors_allowed_origins="*")  # Initialize SocketIO with the app
+socketio.init_app(app, cors_allowed_origins=["https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/"])
 CORS(app,supports_credentials=True)
 
 
