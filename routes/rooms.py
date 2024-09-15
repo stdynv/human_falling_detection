@@ -59,8 +59,7 @@ def update_room_by_number(room_number):
 # delete room 
 @rooms_bp.route('/<string:room_number>', methods=['DELETE'])
 def delete_room_by_number(room_number):
-    room = Room.query.filter_by(room_number=room_number).first_or_404()
-    
+    room = Room.query.filter(db.func.lower(Room.room_number) == room_number.lower()).first_or_404()    
     db.session.delete(room)
     db.session.commit()
     
