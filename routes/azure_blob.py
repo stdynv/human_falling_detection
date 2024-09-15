@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request
 azure_bp = Blueprint('azure_bp', __name__)
 
 # Initialize Azure Blob Storage Client
-CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=humanfalldata;AccountKey=M1Y59oTRKPFcLi47dj99zdmKKqXuNRYirr48ujkfgXH2irTcxtMZrkIFImP8ByGmAX3ioH5yDNPc+AStRrIkrg==;EndpointSuffix=core.windows.net"
+CONNECTION_STRING = "your_connection_string"
 CONTAINER_NAME = "videocontainer"
 
 blob_service_client = BlobServiceClient.from_connection_string(CONNECTION_STRING)
@@ -51,7 +51,6 @@ def generate_sas_link(blob_name, expiry_hours=1):
 
 @azure_bp.route('/upload', methods=['POST'])
 def upload_video():
-    # Check if video file is in the request
     if 'video' not in request.files:
         return jsonify({"error": "No video file provided"}), 400
     
