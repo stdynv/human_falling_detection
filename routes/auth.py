@@ -18,7 +18,7 @@ def login():
     ehpad = Ehpad.query.filter_by(name=data['name']).first()
 
     if not ehpad:
-        return jsonify({"message": "Informations d'identification incorrectes"}), 401
+        return jsonify({"message": "Informations d'identification non correctes"}), 401
 
     # Générer un token JWT
     token = jwt.encode({
