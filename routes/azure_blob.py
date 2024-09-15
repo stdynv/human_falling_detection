@@ -32,7 +32,6 @@ def upload_video_to_blob(file_stream, filename):
         logging.error(f"Error uploading video {filename}: {str(e)}")
         raise
 
-
 def generate_sas_link(blob_name, expiry_hours=1):
     try:
         sas_token = generate_blob_sas(
@@ -52,25 +51,44 @@ def generate_sas_link(blob_name, expiry_hours=1):
 
 @azure_bp.route('/upload', methods=['POST'])
 def upload_video():
+    # Check if video file is in the request
     if 'video' not in request.files:
         return jsonify({"error": "No video file provided"}), 400
     
     video_file = request.files['video']
     video_filename = video_file.filename
     
-    ensure_container_exists()
-    
     try:
-        # Upload the video directly to Azure Blob Storage from the file stream
+        # Ensure the container exists
+        ensure_container_exists()
+        
+        # Upload the video to Azure Blob Storage
         upload_video_to_blob(video_file.stream, video_filename)
         
         # Generate a SAS link for the uploaded video
         sas_link = generate_sas_link(video_filename)
         
         return jsonify({"sas_url": sas_link}), 200
+    
+    except KeyError as e:
+        logging.error(f"KeyError during video upload: {str(e)}")
+        return jsonify({"error": f"Missing required field: {str(e)}"}), 400
+    
+    except ValueError as e:
+        logging.error(f"ValueError during video upload: {str(e)}")
+        return jsonify({"error": f"Invalid value: {str(e)}"}), 400
+
+    except PermissionError as e:
+        logging.error(f"PermissionError during video upload: {str(e)}")
+        return jsonify({"error": "Permission denied"}), 403
+
+    except FileNotFoundError as e:
+        logging.error(f"FileNotFoundError during video upload: {str(e)}")
+        return jsonify({"error": f"File not found: {str(e)}"}), 404
+
     except Exception as e:
         logging.error(f"Error during upload: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 @azure_bp.route('/', methods=['GET'])
 def hello():
