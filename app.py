@@ -39,4 +39,4 @@ def test_socket():
 
 # Run the app using SocketIO instead of app.run
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=8000)
+    socketio.run(app, debug=True, port=8000,host="0.0.0.0")
