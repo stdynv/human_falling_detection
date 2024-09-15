@@ -6,12 +6,6 @@ from extensions import db, socketio  # Import socketio from extensions
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    'mssql+pyodbc://ehpad-admin:Memoire2024!@ehpadserver.database.windows.net:1433/ehpad?driver=ODBC+Driver+18+for+SQL+Server'
-)
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 # Initialize extensions
 db.init_app(app)
 socketio.init_app(app, cors_allowed_origins=["https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net",'*'])
@@ -26,11 +20,9 @@ from routes.staff import staff_bp
 # Register the Blueprints with the Flask app
 app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
 app.register_blueprint(incidents_bp, url_prefix='/api/incidents')
-# app.register_blueprint(azure_bp, url_prefix='/api/azure')
-# app.register_blueprint(staff_bp, url_prefix='/api/staff')
 
 @app.route('/')
-def test_socket():
+def home():
     return render_template('main.html')
 
 # Run the app using SocketIO instead of app.run
