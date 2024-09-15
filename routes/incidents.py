@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 import logging
 from flask_socketio import emit
 from datetime import datetime
@@ -29,26 +29,28 @@ def create_incident():
         db.session.add(new_incident)
         db.session.commit()
 
-        # Step 4: Fetch the room associated with the incident via raspberry_id
-        room = Room.query.filter_by(raspberry_id=new_incident.raspberry_id).first()
+        # Use app.app_context() for operations outside of a request context
+        with current_app.app_context():
+            # Step 4: Fetch the room associated with the incident via raspberry_id
+            room = Room.query.filter_by(raspberry_id=new_incident.raspberry_id).first()
 
-        if room:
-            # Step 5: If room is found, emit the custom message with room number and video URL
-            message = f"A person has fallen in Room {room.room_number}"
-            logging.info(f"Emitting new incident: {new_incident.incident_id} in Room {room.room_number}")
-            
-            # Emit the message along with the video URL
-            socketio.emit('new_incident', {
-                'message': message,
-                'video_url': new_incident.video_url  # Send video URL as well
-            })
-        else:
-            # Emit a message if no room is associated with the raspberry_id
-            logging.warning(f"No room found for raspberry_id: {new_incident.raspberry_id}")
-            socketio.emit('new_incident', {
-                'message': "A person has fallen, but no room was found.",
-                'video_url': new_incident.video_url  # Send video URL even if no room is found
-            })
+            if room:
+                # Step 5: If room is found, emit the custom message with room number and video URL
+                message = f"A person has fallen in Room {room.room_number}"
+                logging.info(f"Emitting new incident: {new_incident.incident_id} in Room {room.room_number}")
+                
+                # Emit the message along with the video URL
+                socketio.emit('new_incident', {
+                    'message': message,
+                    'video_url': new_incident.video_url  # Send video URL as well
+                })
+            else:
+                # Emit a message if no room is associated with the raspberry_id
+                logging.warning(f"No room found for raspberry_id: {new_incident.raspberry_id}")
+                socketio.emit('new_incident', {
+                    'message': "A person has fallen, but no room was found.",
+                    'video_url': new_incident.video_url  # Send video URL even if no room is found
+                })
 
         return jsonify({'message': 'Incident created successfully'}), 201
 
