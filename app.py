@@ -1,5 +1,3 @@
-import eventlet
-eventlet.monkey_patch()  # Always at the top
 
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
