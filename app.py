@@ -28,8 +28,8 @@ from routes.azure_blob import azure_bp
 # Register the Blueprints with the Flask app
 app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
 app.register_blueprint(incidents_bp, url_prefix='/api/incidents')
-app.register_blueprint(azure_bp, url_prefix='/api/azure')
-app.register_blueprint(staff_bp, url_prefix='/api/staff')
+# app.register_blueprint(azure_bp, url_prefix='/api/azure')
+# app.register_blueprint(staff_bp, url_prefix='/api/staff')
 
 @app.route('/')
 def test_socket():
