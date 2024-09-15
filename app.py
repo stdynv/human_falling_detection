@@ -37,6 +37,14 @@ app.register_blueprint(staff_bp, url_prefix='/api/staff')
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
 @app.route('/')
+def home():
+    return render_template('login.html')
+
+@app.route('/success')
+def success():
+    return render_template('success.html')
+
+@app.route('/test socketio')
 def test_socket():
     return render_template('main.html')
 
