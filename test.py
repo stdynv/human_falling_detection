@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 import cvzone
+import AzureBlobSorage as az
 from collections import deque
 import time
 import requests
@@ -15,29 +16,8 @@ rooms_url = "https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/ap
 desired_raspberry_id = "RPI12345"  # ID du Raspberry Pi à rechercher
 
 # Initialiser le numéro de chambre
-room_number = None
+room_number = '101'
 
-# Requête GET pour récupérer les données des chambres
-try:
-    response = requests.get(rooms_url)
-    response.raise_for_status()
-    rooms_data = response.json()
-
-    # Rechercher le room_number associé au raspberry_id désiré
-    for room in rooms_data:
-        if room['raspberry_id'] == desired_raspberry_id:
-            room_number = room['room_number']
-            break
-
-    if room_number:
-        logging.info(f"Raspberry ID {desired_raspberry_id} trouvé, numéro de chambre: {room_number}")
-    else:
-        logging.error(f"Raspberry ID {desired_raspberry_id} introuvable dans les données récupérées.")
-        room_number = "Unknown"  # Valeur par défaut si non trouvé
-
-except requests.exceptions.RequestException as e:
-    logging.error(f"Erreur lors de la récupération des données des chambres : {e}")
-    room_number = "Unknown"  # Valeur par défaut en cas d'erreur
 
 # Initialiser BlazePose
 mp_pose = mp.solutions.pose
@@ -69,9 +49,13 @@ cooldown_active = False  # Indicateur si le cooldown est actif
 count = 0
 person_count = 0
 
+CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=humanfalldata;AccountKey=Bw15KNlxPKxgypqTw/0Wrwz+n8vfNg7KVWuTB6LnFw2c1k5PvUE8nGSk/5ti5Z37+ww5bTY7SCeE+AStxO6ugA==;EndpointSuffix=core.windows.net"
+CONTAINER_NAME = "videocontainer"
 # URL de l'API pour télécharger les vidéos sur Azure et enregistrer les incidents
-upload_url = "https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/api/azure/upload"
+# upload_url = "https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/api/azure/upload"
 incident_url = 'https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/api/incidents/create'
+azure_uploader = az.AzureBlobUploader(CONNECTION_STRING, CONTAINER_NAME)
+azure_uploader.ensure_container_exists()
 
 while True:
     ret, frame = cap.read()
@@ -144,31 +128,8 @@ while True:
 
             if os.path.exists(video_file_name):
                 try:
-                    with open(video_file_name, 'rb') as video_file:
-                        files = {'video': (video_file_name, video_file, 'video/mp4')}
-                        response = requests.post(upload_url, files=files)
-
-                        if response.status_code == 200:
-                            logging.info("Vidéo téléchargée avec succès.")
-                            sas_url = response.json().get("sas_url")
-
-                            incident_data = {
-                                'raspberry_id': desired_raspberry_id,
-                                'incident_date': fall_time,
-                                'description': f'Fall detected in room {room_number}',
-                                'video_url': sas_url,
-                                'status': 'pending'
-                            }
-
-                            incident_response = requests.post(incident_url, json=incident_data)
-
-                            if incident_response.status_code == 201:
-                                logging.info("Incident signalé avec succès.")
-                            else:
-                                logging.error(f"Erreur lors de la signalisation de l'incident : {incident_response.text}")
-                        else:
-                            logging.error(f"Échec du téléchargement de la vidéo : {response.text}")
-
+                    azure_uploader.upload_video(video_file_name)
+                    logging.info(f"Vidéo téléchargée avec succès : {video_file_name}")
                 except Exception as e:
                     logging.error(f"Erreur lors du téléchargement de la vidéo : {e}")
             else:
