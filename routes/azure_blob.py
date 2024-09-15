@@ -14,25 +14,24 @@ container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 
 def ensure_container_exists():
     try:
-        # Ensure the container exists
         if not container_client.exists():
             container_client.create_container()
+        logging.info("Container exists or created successfully.")
     except Exception as e:
         logging.error(f"Error ensuring container exists: {str(e)}")
         raise
 
 def upload_video_to_blob(file_stream, filename):
-    blob_client = container_client.get_blob_client(filename)
-    
     try:
+        logging.info(f"Uploading {filename} to Azure Blob Storage...")
         content_settings = ContentSettings(content_type='video/mp4')
-
-        # Upload the file stream directly to Azure Blob Storage
+        blob_client = container_client.get_blob_client(filename)
         blob_client.upload_blob(file_stream, overwrite=True, content_settings=content_settings)
         logging.info(f"Video {filename} uploaded successfully.")
     except Exception as e:
         logging.error(f"Error uploading video {filename}: {str(e)}")
         raise
+
 
 def generate_sas_link(blob_name, expiry_hours=1):
     try:
