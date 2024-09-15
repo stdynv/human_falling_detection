@@ -69,7 +69,7 @@
             event.preventDefault(); // Empêche le rechargement de la page
 
             const name = document.getElementById('name').value;
-            const password_hash = document.getElementById('password_hash').value;
+            const password_hash = document.getElementById('password').value;
 
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
