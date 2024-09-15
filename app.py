@@ -23,7 +23,7 @@ CORS(app, supports_credentials=True)
 from routes.rooms import rooms_bp
 from routes.incidents import incidents_bp
 from routes.staff import staff_bp
-from routes.azure_blob import azure_bp
+# from routes.azure_blob import azure_bp
 
 # Register the Blueprints with the Flask app
 app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
