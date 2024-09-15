@@ -12,6 +12,15 @@ CORS(app, resources={r"/*": {"origins": "https://flask-ehpad-fde5f2fndkd0f2gk.ea
 
 
 # Blueprint imports and registration here
+# Import the Blueprints from the routes
+from routes.rooms import rooms_bp
+from routes.incidents import incidents_bp
+from routes.staff import staff_bp
+# from routes.azure_blob import azure_bp
+
+# Register the Blueprints with the Flask app
+app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
+app.register_blueprint(incidents_bp, url_prefix='/api/incidents')
 
 @app.route('/')
 def test_socket():
