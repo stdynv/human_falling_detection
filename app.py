@@ -1,12 +1,20 @@
-import eventlet
-eventlet.monkey_patch()
-
 from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from extensions import db, socketio
+from extensions import db, socketio  # Import socketio from extensions
+
+
 
 app = Flask(__name__)
 
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    'mssql+pyodbc://ehpad-admin:Memoire2024!@ehpadserver.database.windows.net:1433/ehpad?driver=ODBC+Driver+18+for+SQL+Server'
+)
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize extensions
+db.init_app(app)
 socketio.init_app(app, cors_allowed_origins=["https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net"])
 CORS(app, resources={r"/*": {"origins": "https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net"}})
 
