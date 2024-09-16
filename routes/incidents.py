@@ -5,9 +5,6 @@ from datetime import datetime
 from models import Incident, Room
 from extensions import db, socketio
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-
 # Create the Blueprint for incidents
 incidents_bp = Blueprint('incidents_bp', __name__)
 
@@ -17,13 +14,6 @@ def create_incident():
     try:
         # Fetch the JSON data from the request
         data = request.get_json()
-
-        # Validate that required fields are present
-        if not all(key in data for key in ['raspberry_id', 'description', 'video_url', 'status']):
-            logging.error("Missing required fields in the request data")
-            return jsonify({'error': 'Missing required fields'}), 400
-
-        # Set the current timestamp for the incident
         incident_date = datetime.now()
 
         # Create a new incident record
@@ -42,7 +32,7 @@ def create_incident():
         # Fetch the room associated with the incident via raspberry_id
         room = Room.query.filter_by(raspberry_id=new_incident.raspberry_id).first()
 
-        # Create the notification message
+        # Emit message based on room existence
         if room:
             message = f"A person has fallen in Room {room.room_number}"
             logging.info(f"Emitting new incident: {new_incident.incident_id} in Room {room.room_number}")
@@ -51,13 +41,13 @@ def create_incident():
             logging.warning(f"No room found for raspberry_id: {new_incident.raspberry_id}")
 
         try:
-            # Emit the message and video URL to all connected clients
+            # Emit the message along with the video URL
             socketio.emit('notification', {
                 'message': message,
                 'video_url': new_incident.video_url
-            }, broadcast=True)
-
-            logging.info('Incident notification emitted to frontend')
+            })
+            
+            logging.info('event submited to the frontend ')
         except Exception as e:
             logging.error(f"Error emitting WebSocket message: {e}")
 
@@ -66,4 +56,4 @@ def create_incident():
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error while creating an incident: {e}")
-        return jsonify({'error': 'An internal error occurred while creating the incident'}), 500
+        return jsonify({'error': f'An error occurred while creating the incident: {e}'}), 500
