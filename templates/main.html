@@ -13,14 +13,13 @@
 
     <script type="text/javascript">
         // Connect to the Flask-SocketIO server
-        var socket = io('https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net', { path: '/socket.io', transports: ['websocket'] });
-
-        socket.on('new_incident', function(data) {
-            console.log('New incident received:', data);
-            document.getElementById('message').innerText = 'New incident: ' + JSON.stringify(data);
-        });
-
-
+        var socket = io('https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net', {
+    transports: ['websocket'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000
+    });
+    
         // Listen for connection
         socket.on('connect', function() {
             document.getElementById('status').innerText = 'Connected to SocketIO server!';

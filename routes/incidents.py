@@ -1,7 +1,3 @@
-import eventlet
-eventlet.monkey_patch()  # C'est important pour activer le mode non-bloquant
-
-
 from flask import Blueprint, jsonify, request
 import logging
 from flask_socketio import emit
@@ -47,8 +43,8 @@ def create_incident():
         try:
             # Emit the message along with the video URL
             socketio.emit('new_incident', {
-            'message': message,
-            'video_url': new_incident.video_url
+                'message': message,
+                'video_url': new_incident.video_url
             })
         except Exception as e:
             logging.error(f"Error emitting WebSocket message: {e}")
