@@ -1,3 +1,7 @@
+import eventlet
+eventlet.monkey_patch()  # C'est important pour activer le mode non-bloquant
+
+
 from flask import Blueprint, jsonify, request
 import logging
 from flask_socketio import emit
