@@ -21,7 +21,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 # Initialize SocketIO with eventlet async mode
-socketio = SocketIO(app, debug=True, cors_allowed_origins="*", async_mode='eventlet')
+socketio = SocketIO(app, debug=True, cors_allowed_origins="*")
 
 # CORS configuration to allow your Azure URL
 CORS(app, resources={r"/*": {"origins": "https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net"}})
