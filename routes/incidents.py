@@ -47,8 +47,8 @@ def create_incident():
         try:
             # Emit the message along with the video URL
             socketio.emit('new_incident', {
-                'message': message,
-                'video_url': new_incident.video_url
+            'message': message,
+            'video_url': new_incident.video_url
             })
         except Exception as e:
             logging.error(f"Error emitting WebSocket message: {e}")
