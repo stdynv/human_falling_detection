@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, request
 import logging
+from flask_socketio import emit
 from datetime import datetime
 from models import Incident, Room
-from extensions import db, socketio  # Assuming socketio is also in extensions
+from extensions import db, socketio  # Import socketio
 
 # Create the Blueprint for incidents
 incidents_bp = Blueprint('incidents_bp', __name__)
@@ -34,7 +35,7 @@ def create_incident():
         # Emit message based on room existence
         if room:
             message = f"A person has fallen in Room {room.room_number}"
-            logging.info(f"Emitting new incident: {new_incident.id} in Room {room.room_number}")
+            logging.info(f"Emitting new incident: {new_incident.incident_id} in Room {room.room_number}")
         else:
             message = "A person has fallen, but no room was found."
             logging.warning(f"No room found for raspberry_id: {new_incident.raspberry_id}")
@@ -45,14 +46,13 @@ def create_incident():
                 'message': message,
                 'video_url': new_incident.video_url
             })
-            
-            logging.info('Event submitted to the frontend')
+            logging.info('event submited to the frontend ')
         except Exception as e:
             logging.error(f"Error emitting WebSocket message: {e}")
 
-        return jsonify({'message': 'Incident created successfully', 'incident_id': new_incident.id}), 201
+        return jsonify({'message': 'Incident created successfully'}), 201
 
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error while creating an incident: {e}")
-        return jsonify({'error': f'An error occurred while creating the incident: {str(e)}'}), 500
+        return jsonify({'error': f'An error occurred while creating the incident: {e}'}), 500
