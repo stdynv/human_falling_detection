@@ -46,7 +46,7 @@ def create_incident():
             logging.error(f"Error emitting WebSocket message: {e}")
 
         # Return success response
-        return jsonify({'message': 'Incident created successfully', 'incident_id': new_incident.id}), 201
+        return jsonify({'message': 'Incident created successfully', 'incident_id': new_incident.incident_id}), 201
 
     except Exception as e:
         # Roll back the transaction in case of error
