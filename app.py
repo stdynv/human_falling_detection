@@ -2,10 +2,9 @@ from eventlet import monkey_patch
 monkey_patch() 
 
 from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from extensions import db, socketio 
-from flask_socketio import SocketIO
+
 
 
 
@@ -19,7 +18,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
 db.init_app(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio(app, cors_allowed_origins="https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net")
 CORS(app)
 
 

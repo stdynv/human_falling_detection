@@ -13,13 +13,7 @@
 
     <script type="text/javascript">
         // Connect to the Flask-SocketIO server
-        var socket = io('https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net', 
-        {
-            transports: ['websocket'],
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000
-        });
+        var socket = io('wss://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net')
     
         // Listen for connection
         socket.on('connect', function() {
