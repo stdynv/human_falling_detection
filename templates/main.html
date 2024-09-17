@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SocketIO Test</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
 </head>
 <body>
     <h1>SocketIO Test</h1>
@@ -13,11 +14,11 @@
 
     <script type="text/javascript">
         // Replace 'wss://' with 'ws://' if not using SSL
-        var socket = io('wss://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net', {
-            transports: ['websocket'], // Make sure only websocket transport is used
+        var socket = io('http://127.0.0.1:5000', {
+            transports: ['websocket'],  // Forces WebSocket only
             reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000
+            reconnectionAttempts: 5,    // Adjust this to suit your needs
+            reconnectionDelay: 2000     // Delay reconnection attempts to avoid flooding
         });
     
         // Listen for connection

@@ -1,9 +1,10 @@
-from eventlet import monkey_patch
-monkey_patch()  # Monkey patching for eventlet must happen at the very top
-
 from flask import Flask, render_template
 from flask_cors import CORS
 from extensions import db, socketio
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
@@ -15,7 +16,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
 db.init_app(app)  # Initialize the SQLAlchemy extension with the Flask app
-socketio.init_app(app, cors_allowed_origins="*")  # Properly initialize SocketIO
+socketio.init_app(app, cors_allowed_origins="*", engineio_logger=True, ping_timeout=60, ping_interval=25)
 CORS(app)  # Enable CORS
 
 # Blueprint imports and registration
@@ -32,6 +33,7 @@ app.register_blueprint(incidents_bp, url_prefix='/api/incidents')
 def test_socket():
     return render_template('main.html')
 
-# Run the app
+# Run the app using eventlet
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=8000, host="0.0.0.0")
+    # Ensure eventlet works properly with other libraries
+    socketio.run(app, debug=True, host="0.0.0.0", port=8000)
