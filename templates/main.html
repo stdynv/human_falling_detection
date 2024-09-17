@@ -14,7 +14,7 @@
 
     <script type="text/javascript">
         // Replace 'wss://' with 'ws://' if not using SSL
-        var socket = io('http://127.0.0.1:5000', {
+        var socket = io('https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net', {
             transports: ['websocket'],  // Forces WebSocket only
             reconnection: true,
             reconnectionAttempts: 5,    // Adjust this to suit your needs
