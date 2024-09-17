@@ -3,20 +3,17 @@ import logging
 from flask_socketio import emit
 from datetime import datetime
 from models import Incident, Room
-from extensions import db, socketio  # Import socketio
+from extensions import db, socketio
 
-# Create the Blueprint for incidents
 incidents_bp = Blueprint('incidents_bp', __name__)
 
-# Route for creating an incident
 @incidents_bp.route('/create', methods=['POST'])
 def create_incident():
     try:
-        # Fetch the JSON data from the request
         data = request.get_json()
         incident_date = datetime.now()
 
-        # Create a new incident record
+        # Create new incident
         new_incident = Incident(
             raspberry_id=data['raspberry_id'],
             incident_date=incident_date,
@@ -25,14 +22,12 @@ def create_incident():
             status=data['status']
         )
 
-        # Save the new incident to the database
         db.session.add(new_incident)
-        db.session.commit()
+        db.session.commit()  # Commit the new incident to the database
 
-        # Fetch the room associated with the incident via raspberry_id
+        # Find associated room
         room = Room.query.filter_by(raspberry_id=new_incident.raspberry_id).first()
 
-        # Emit message based on room existence
         if room:
             message = f"A person has fallen in Room {room.room_number}"
             logging.info(f"Emitting new incident: {new_incident.incident_id} in Room {room.room_number}")
@@ -40,19 +35,21 @@ def create_incident():
             message = "A person has fallen, but no room was found."
             logging.warning(f"No room found for raspberry_id: {new_incident.raspberry_id}")
 
+        # Emit the notification
         try:
-            # Emit the message along with the video URL
             socketio.emit('notification', {
                 'message': message,
                 'video_url': new_incident.video_url
             })
-            logging.info('event submited to the frontend ')
+            logging.info(f'Notification emitted: {message}')
         except Exception as e:
             logging.error(f"Error emitting WebSocket message: {e}")
 
-        return jsonify({'message': 'Incident created successfully'}), 201
+        # Return success response
+        return jsonify({'message': 'Incident created successfully', 'incident_id': new_incident.id}), 201
 
     except Exception as e:
+        # Roll back the transaction in case of error
         db.session.rollback()
         logging.error(f"Error while creating an incident: {e}")
-        return jsonify({'error': f'An error occurred while creating the incident: {e}'}), 500
+        return jsonify({'error': f'An error occurred while creating the incident: {str(e)}'}), 500
