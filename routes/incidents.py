@@ -1,12 +1,9 @@
 from flask import Blueprint, jsonify, request
 import logging
+from flask_socketio import emit
 from datetime import datetime
 from models import Incident, Room
-from flask_sqlalchemy import SQLAlchemy
-from flask_socketio import SocketIO
-
-db = SQLAlchemy()
-socketio = SocketIO()
+from extensions import db, socketio
 
 incidents_bp = Blueprint('incidents_bp', __name__)
 
