@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request
 import logging
 from flask_socketio import emit
 from datetime import datetime
@@ -35,16 +35,15 @@ def create_incident():
             message = "A person has fallen, but no room was found."
             logging.warning(f"No room found for raspberry_id: {new_incident.raspberry_id}")
 
-        # Emit the notification with application context
-        with current_app.app_context():  # Push the app context if needed
-            try:
-                socketio.emit('notification', {
-                    'message': message,
-                    'video_url': new_incident.video_url
-                })
-                logging.info(f'Notification emitted: {message}')
-            except Exception as e:
-                logging.error(f"Error emitting WebSocket message: {e}")
+        # Emit the notification (no need for app context here)
+        try:
+            socketio.emit('notification', {
+                'message': message,
+                'video_url': new_incident.video_url
+            })
+            logging.info(f'Notification emitted: {message}')
+        except Exception as e:
+            logging.error(f"Error emitting WebSocket message: {e}")
 
         # Return success response
         return jsonify({'message': 'Incident created successfully', 'incident_id': new_incident.incident_id}), 201
