@@ -28,10 +28,11 @@
         });
 
         // Listen for a "new_incident" event
-        socket.on('notification', function(data) {
-            console.log('New incident received:',data);
+        socket.on('message', function(data) {
+            console.log('New incident received:', data);
             document.getElementById('message').innerText = 'New incident: ' + JSON.stringify(data);
         });
+
 
         // Listen for disconnection
         socket.on('disconnect', function() {

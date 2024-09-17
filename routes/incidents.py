@@ -1,9 +1,12 @@
 from flask import Blueprint, jsonify, request
 import logging
-from flask_socketio import emit
 from datetime import datetime
 from models import Incident, Room
-from extensions import db, socketio
+from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO
+
+db = SQLAlchemy()
+socketio = SocketIO()
 
 incidents_bp = Blueprint('incidents_bp', __name__)
 
@@ -37,13 +40,14 @@ def create_incident():
 
         # Emit the notification
         try:
-            socketio.emit('notification', {
+            socketio.send({
                 'message': message,
                 'video_url': new_incident.video_url
-            })
-            logging.info(f'Notification emitted: {message}')
+            })  # Send message without a custom event name
+            logging.info(f'Notification sent: {message}')
         except Exception as e:
-            logging.error(f"Error emitting WebSocket message: {e}")
+            logging.error(f"Error sending WebSocket message: {e}")
+
 
         # Return success response
         return jsonify({'message': 'Incident created successfully', 'incident_id': new_incident.incident_id}), 201
