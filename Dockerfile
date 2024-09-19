@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the port
-EXPOSE 5000
+EXPOSE 8000
 
 # Set the entrypoint command to run the app with Gunicorn and eventlet worker
 CMD ["python","app.py"]

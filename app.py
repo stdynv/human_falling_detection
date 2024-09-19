@@ -76,4 +76,4 @@ def test_socket():
 # Run the app using eventlet
 if __name__ == "__main__":
     # Ensure eventlet works properly with other libraries
-    socketio.run(app, debug=True, host="0.0.0.0")
+    socketio.run(app, debug=True, host="0.0.0.0",port=8000)
