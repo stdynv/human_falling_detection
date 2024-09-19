@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Succès - ProtectCare</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6ffe6;
+            display: flex;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .success-container {
+            background-color: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .success-container h2 {
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .success-container button {
+            padding: 10px 20px;
+            background-color: #dc3545;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .success-container button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <h2>Connexion réussie !</h2>
+        <p>Bienvenue dans l'application ProtectCare.</p>
+        <button id="logoutBtn">Se déconnecter</button>
+    </div>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            // Envoyer une requête POST pour la déconnexion
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.status === 200) {
+                // Supprimer le token du localStorage
+                localStorage.removeItem('token');
+                // Rediriger vers la page de connexion
+                window.location.href = '/';
+            } else {
+                alert(result.message || 'Erreur lors de la déconnexion.');
+            }
+        });
+    </script>
+</body>
+</html>
