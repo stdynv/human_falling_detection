@@ -33,7 +33,6 @@ CORS(app)  # Enable CORS
 from routes.rooms import rooms_bp
 from routes.incidents import incidents_bp
 from routes.staff import staff_bp
-# from routes.azure_blob import azure_bp
 from routes.auth import auth_bp , token_required
 
 
@@ -77,4 +76,4 @@ def test_socket():
 # Run the app using eventlet
 if __name__ == "__main__":
     # Ensure eventlet works properly with other libraries
-    socketio.run(app, debug=True, host="0.0.0.0",port=8000)
+    socketio.run(app, debug=True, host="0.0.0.0")

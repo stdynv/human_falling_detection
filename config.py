@@ -20,7 +20,7 @@ class Config:
         "?driver=ODBC+Driver+18+for+SQL+Server"
         "&Encrypt=yes"
         "&TrustServerCertificate=no"
-        "&Connection Timeout=30"
+        "&Connection Timeout=60"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
