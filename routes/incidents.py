@@ -39,6 +39,7 @@ def create_incident():
         try:
             socketio.emit('notification', {
                 'message': message,
+                'incident_date': incident_date,
                 'video_url': new_incident.video_url
             })
             logging.info(f'Notification emitted: {message}')
