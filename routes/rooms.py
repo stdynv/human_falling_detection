@@ -54,26 +54,21 @@ def get_rooms():
         return jsonify({"error": f"Failed to fetch rooms: {str(e)}"}), 500
 
 
-# Get a specific room by ID
-@rooms_bp.route("/<int:room_id>", methods=["GET"])
-def get_room(room_id):
+# Get a specific room by room number
+@rooms_bp.route("<string:room_number>", methods=["GET"])
+def get_room(room_number):
     try:
-        room = Room.query.get(room_id)
+        room = Room.query.filter_by(room_number=room_number).first()
         if room is None:
             return jsonify({"error": "Room not found"}), 404
-        return (
-            jsonify(
-                {
-                    "room_id": room.room_id,
-                    "room_number": room.room_number,
-                    "floor": room.floor,
-                    "type": room.type,
-                    "occupied": room.occupied,
-                    "raspberry_id": room.raspberry_id,
-                }
-            ),
-            200,
-        )
+        return jsonify({
+            "room_id": room.room_id,
+            "room_number": room.room_number,
+            "floor": room.floor,
+            "type": room.type,
+            "occupied": room.occupied,
+            "raspberry_id": room.raspberry_id,
+        }), 200
     except Exception as e:
         return jsonify({"error": f"Failed to fetch room: {str(e)}"}), 500
 
