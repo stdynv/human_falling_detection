@@ -12,7 +12,7 @@ def create_incident():
     try:
         data = request.get_json()
         incident_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        logging(incident_date)
+        logging.info(incident_date)
 
         # Create new incident
         new_incident = Incident(
