@@ -11,13 +11,14 @@ logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
-# Configure the application from the Config class
+
 app.config.from_object(
     Config
-)  # This will load all the attributes set in your Config class
+)
 
-# Initialize extensions with proper configuration
-db.init_app(app)  # Initialize the SQLAlchemy extension with the Flask app
+# Initialize the SQLAlchemy extension with the Flask app
+db.init_app(app) 
+
 socketio.init_app(
     app,
     cors_allowed_origins="*",
@@ -48,4 +49,4 @@ def test_socket():
 # Run the app using eventlet
 if __name__ == "__main__":
     # Ensure eventlet works properly with other libraries
-    socketio.run(app, debug=True, host="0.0.0.0")
+    socketio.run(app, debug=True, host="0.0.0.0",port=8000)
