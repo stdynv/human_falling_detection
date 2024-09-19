@@ -1,28 +1,35 @@
-from flask import Flask, render_template_string,render_template
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template
 from flask_cors import CORS
-from extensions import db, socketio  # Import socketio from extensions
-from sqlalchemy import text
+import socket
+from extensions import db, socketio
+import logging
+from config import Config  # Ensure this path is correct as per your project structure
+import os
 
-
-
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    'mssql+pyodbc://ehpad-admin:Memoire2024!@ehpadserver.database.windows.net:1433/ehpad?driver=ODBC+Driver+18+for+SQL+Server'
+
+app.config.from_object(
+    Config
 )
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Initialize the SQLAlchemy extension with the Flask app
+db.init_app(app) 
 
-# Initialize extensions
-db.init_app(app)
-socketio.init_app(app, cors_allowed_origins=["https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net"])
-CORS(app,supports_credentials=True)
+socketio.init_app(
+    app,
+    cors_allowed_origins="*",
+    engineio_logger=True,
+    ping_timeout=60,
+    ping_interval=25,
+)
+CORS(app)  # Enable CORS
 
-
-# Import the Blueprints from the routes
+# Blueprint imports and registration
 from routes.rooms import rooms_bp
 from routes.incidents import incidents_bp
 from routes.staff import staff_bp
@@ -61,6 +68,15 @@ def contact_page():
 def tables_page():
     return render_template('tables-basic.html')
 
+# Test route to check WebSocket connection
+@app.route("/dashboard")
+def test_socket():
+    server_url = os.getenv("SERVER")
+    hostname = socket.gethostname()
+    return render_template("main.html", socket_url=hostname)
 
-if __name__ == '__main__':
-    socketio.run(app, debug=True, port=8000)
+
+# Run the app using eventlet
+if __name__ == "__main__":
+    # Ensure eventlet works properly with other libraries
+    socketio.run(app, debug=True, host="0.0.0.0",port=8000)

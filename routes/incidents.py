@@ -3,55 +3,77 @@ import logging
 from flask_socketio import emit
 from datetime import datetime
 from models import Incident, Room
-from extensions import db, socketio  # Import socketio
+from extensions import db, socketio
+import pytz
 
-# Create the Blueprint for incidents
-incidents_bp = Blueprint('incidents_bp', __name__)
+incidents_bp = Blueprint("incidents_bp", __name__)
 
-# Route for creating an incident
-@incidents_bp.route('/create', methods=['POST'])
+
+@incidents_bp.route("/create", methods=["POST"])
 def create_incident():
     try:
-        # Step 1: Fetch the JSON data from the request
         data = request.get_json()
-        incident_date = datetime.now()
+        incident_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logging.info(incident_date)
 
-        # Step 2: Create a new incident record
+        # Create new incident
         new_incident = Incident(
-            raspberry_id=data['raspberry_id'],
+            raspberry_id=data["raspberry_id"],
             incident_date=incident_date,
-            description=data['description'],
-            video_url=data['video_url'],
-            status=data['status']
+            description=data["description"],
+            video_url=data["video_url"],
+            status=data["status"],
         )
 
-        # Step 3: Save the new incident to the database
         db.session.add(new_incident)
-        db.session.commit()
+        db.session.commit()  # Commit the new incident to the database
 
-        # Step 4: Fetch the room associated with the incident via raspberry_id
+        # Find associated room
         room = Room.query.filter_by(raspberry_id=new_incident.raspberry_id).first()
 
         if room:
-            # Step 5: If room is found, emit the custom message with room number and video URL
             message = f"A person has fallen in Room {room.room_number}"
-            logging.info(f"Emitting new incident: {new_incident.incident_id} in Room {room.room_number}")
-            
-            # Emit the message along with the video URL
-            socketio.emit('new_incident', {
-                'message': message,
-                'video_url': new_incident.video_url  # Send video URL as well
-            })
+            logging.info(
+                f"Emitting new incident: {new_incident.incident_id} in Room {room.room_number}"
+            )
         else:
-            # Emit a message if no room is associated with the raspberry_id
-            logging.warning(f"No room found for raspberry_id: {new_incident.raspberry_id}")
-            socketio.emit('new_incident', {
-                'message': "A person has fallen, but no room was found.",
-                'video_url': new_incident.video_url  # Send video URL even if no room is found
-            })
+            message = "A person has fallen, but no room was found."
+            logging.warning(
+                f"No room found for raspberry_id: {new_incident.raspberry_id}"
+            )
 
-        return jsonify({'message': 'Incident created successfully'}), 201
+        # Emit the notification (no need for app context here)
+        try:
+            socketio.emit(
+                "notification",
+                {
+                    "message": message,
+                    "incident_date": str(incident_date),
+                    "video_url": new_incident.video_url,
+                },
+            )
+            logging.info(f"Notification emitted: {message}")
+        except Exception as e:
+            logging.error(f"Error emitting WebSocket message: {e}")
+
+        # Return success response
+        return (
+            jsonify(
+                {
+                    "message": "Incident created successfully",
+                    "incident_id": new_incident.incident_id,
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
+        # Roll back the transaction in case of error
+        db.session.rollback()
         logging.error(f"Error while creating an incident: {e}")
-        return jsonify({'error': f'An error occurred while creating the incident: {e}'}), 500
+        return (
+            jsonify(
+                {"error": f"An error occurred while creating the incident: {str(e)}"}
+            ),
+            500,
+        )
