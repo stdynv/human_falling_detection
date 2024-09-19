@@ -66,6 +66,7 @@
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(event) {
+
             event.preventDefault(); // Empêche le rechargement de la page
 
             const name = document.getElementById('name').value;
@@ -85,7 +86,7 @@
                 // Stocker le token dans le localStorage
                 localStorage.setItem('token', result.token);
                 // Rediriger vers la page de succès
-                window.location.href = '/success';
+                window.location.href = '/tables-basic';
             } else {
                 // Afficher le message d'erreur
                 document.getElementById('error').innerText = result.message;

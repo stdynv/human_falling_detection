@@ -3,6 +3,7 @@ from werkzeug.security import check_password_hash
 from models import Ehpad  # Utiliser le modèle EHPAD que nous avons créé
 import jwt
 import datetime
+from functools import wraps
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -17,7 +18,7 @@ def login():
     # Chercher l'EHPAD par nom d'utilisateur
     ehpad = Ehpad.query.filter_by(name=data['name']).first()
 
-    if not ehpad:
+    if not ehpad or not check_password_hash(ehpad.password_hash, data['password_hash']):
         return jsonify({"message": "Informations d'identification non correctes"}), 401
 
     # Générer un token JWT
@@ -33,3 +34,23 @@ def login():
 def logout():
     # Du côté serveur, nous ne gérons pas les sessions, donc nous pouvons simplement informer le client
     return jsonify({"message": "Déconnexion réussie, veuillez supprimer le token du stockage local."}), 200
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]  # Bearer <token>
+
+        if not token:
+            return jsonify({'message': 'Token manquant!'}), 401
+
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            current_ehpad = Ehpad.query.filter_by(id=data['ehpad_id']).first()
+        except:
+            return jsonify({'message': 'Token invalide!'}), 401
+
+        return f(current_ehpad, *args, **kwargs)
+
+    return decorated

@@ -27,7 +27,8 @@ from routes.rooms import rooms_bp
 from routes.incidents import incidents_bp
 from routes.staff import staff_bp
 from routes.azure_blob import azure_bp
-from routes.auth import auth_bp
+from routes.auth import auth_bp , token_required
+
 
 # Register the Blueprints with the Flask app
 app.register_blueprint(rooms_bp, url_prefix='/api/rooms')
@@ -37,17 +38,29 @@ app.register_blueprint(staff_bp, url_prefix='/api/staff')
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
 @app.route('/')
-def home():
-    return render_template('login.html')
+def login_page():
+    return render_template('auth-login-basic.html')
 
 @app.route('/success')
 def success():
     return render_template('success.html')
 
-@app.route('/test socketio')
-def test_socket():
-    return render_template('main.html')
+@app.route('/forgot-password')
+def forgot_password_page():
+    return render_template('auth-forgot-password-basic.html')
 
-# Run the app using SocketIO instead of app.run
+@app.route('/chambres')
+def chambres_page():
+    return render_template('chambres.html')
+
+@app.route('/contact')
+def contact_page():
+    return render_template('contact.html')
+
+@app.route('/tables-basic')
+def tables_page():
+    return render_template('tables-basic.html')
+
+
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=8000)
