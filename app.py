@@ -55,6 +55,7 @@ def forgot_password_page():
 
 @app.route('/chambres')
 def chambres_page():
+    
     return render_template('chambres.html')
 
 @app.route('/contact')
