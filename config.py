@@ -2,7 +2,11 @@ import os
 import pyodbc
 from dotenv import load_dotenv
 
-load_dotenv()
+# Check if the .env file exists
+if os.path.exists(".env"):
+    load_dotenv()
+else:
+    print("No .env file found. Assuming environment variables are set externally.")
 
 
 class Config:
@@ -19,7 +23,6 @@ class Config:
         "&Connection Timeout=30"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     @staticmethod
     def get_db_connection():
@@ -27,10 +30,10 @@ class Config:
         try:
             conn = pyodbc.connect(
                 "DRIVER={ODBC Driver 18 for SQL Server};"
-                f"SERVER=tcp:{os.getenv('DB_SERVER')},1433;"
-                f"DATABASE={os.getenv('DB_DATABASE')};"
-                f"UID={os.getenv('DB_USERNAME')};"
-                f"PWD={os.getenv('DB_PASSWORD')};"
+                f"SERVER=tcp:{Config.DB_SERVER},1433;"
+                f"DATABASE={Config.DB_DATABASE};"
+                f"UID={Config.DB_USERNAME};"
+                f"PWD={Config.DB_PASSWORD};"
                 "Encrypt=yes;"
                 "TrustServerCertificate=no;"
                 "Connection Timeout=30;"
