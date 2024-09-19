@@ -142,7 +142,7 @@
 });
 
 function fetchRooms() {
-  fetch('/api/rooms')
+  fetch('https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/api/rooms')
     .then(response => response.json())
     .then(data => {
       const roomsTable = document.getElementById('roomsData');
