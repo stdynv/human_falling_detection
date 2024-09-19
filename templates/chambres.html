@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', filename='') }}" data-template="vertical-menu-template-free" data-style="light">
 
 <head>
@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
   <title>Chambres - Gestion | Détection de Chute</title>
-
   <meta name="description" content="Gestion des chambres pour la détection de chutes." />
 
   <!-- Favicon -->
@@ -83,7 +82,7 @@
                 </li>
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                    <i class="bx bx-user-circle bx-sm"></i>
+                    <i the="bx bx-user-circle bx-sm"></i>
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="/profile">Profil</a></li>
@@ -116,23 +115,8 @@
                       <th>Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td><a href="{{ url_for('rooms_bp.get_room', room_id=102) }}">101</a></td>
-                      <td><span class="badge bg-label-danger me-1">Chute</span></td>
-                      <td>Il y a 10 min</td>
-                      <td>
-                        <button type="button" class="btn btn-danger btn-sm">Supprimer</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><a href="{{ url_for('rooms_bp.get_room', room_id=102) }}">102</a></td>
-                      <td><span class="badge bg-label-success me-1">OK</span></td>
-                      <td>Il y a 15 min</td>
-                      <td>
-                        <button type="button" class="btn btn-danger btn-sm">Supprimer</button>
-                      </td>
-                    </tr>
+                  <tbody id="roomsData">
+                    <!-- Data will be populated here through fetch -->
                   </tbody>
                 </table>
               </div>
@@ -152,6 +136,41 @@
   <script src="{{ url_for('static', filename='vendor/js/bootstrap.js') }}"></script>
   <script src="{{ url_for('static', filename='vendor/js/menu.js') }}"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+  fetchRooms();
+});
+
+function fetchRooms() {
+  fetch('/api/rooms')
+    .then(response => response.json())
+    .then(data => {
+      const roomsTable = document.getElementById('roomsData');
+      if (data.length === 0) {
+        roomsTable.innerHTML = '<tr><td colspan="4">No rooms available</td></tr>';
+      } else {
+        roomsTable.innerHTML = ''; // Clear existing rows
+        data.forEach(room => {
+          const stateBadge = room.occupied ? 'bg-label-danger' : 'bg-label-success';
+          const stateText = room.occupied ? 'Occupied' : 'Available';
+          const row = `<tr>
+                        <td><a href="/api/rooms/${room.room_number}">${room.room_number}</a></td>
+                        <td><span class="badge ${stateBadge}">${stateText}</span></td>
+                        <td>${room.last_updated}</td>
+                        <td><button class="btn btn-danger btn-sm">Delete</button></td>
+                      </tr>`;
+          roomsTable.innerHTML += row;
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching rooms:', error);
+      roomsTable.innerHTML = '<tr><td colspan="4">Failed to fetch data</td></tr>';
+    });
+}
+
+
+  </script>
 </body>
 
 </html>
