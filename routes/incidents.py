@@ -11,7 +11,7 @@ incidents_bp = Blueprint('incidents_bp', __name__)
 def create_incident():
     try:
         data = request.get_json()
-        incident_date = datetime.now()
+        incident_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         # Create new incident
         new_incident = Incident(

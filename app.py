@@ -32,7 +32,6 @@ app.register_blueprint(incidents_bp, url_prefix='/api/incidents')
 @app.route('/')
 def test_socket():
     return render_template('main.html')
-
 # Run the app using eventlet
 if __name__ == '__main__':
     # Ensure eventlet works properly with other libraries
