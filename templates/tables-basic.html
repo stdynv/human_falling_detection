@@ -54,8 +54,35 @@
       color: gray;
     }
   </style>
-</head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
+</head>
+<script type="text/javascript">
+  var socket = io('{{server_url}}', {
+            transports: ['websocket'],  // Forces WebSocket only
+            reconnection: true,
+            reconnectionAttempts: 5,    // Adjust this to suit your needs
+            reconnectionDelay: 2000     // Delay reconnection attempts to avoid flooding
+        });
+    
+        // Listen for connection
+        socket.on('connect', function() {
+            // document.getElementById('status').innerText = 'Connected to SocketIO server!';
+            console.log('Connected to SocketIO server');
+        });
+
+        // Listen for the 'notification' event (or correct event name)
+        socket.on('notification', function(data) {
+            console.log('New incident received:', data);
+            // document.getElementById('message').innerText = 'New incident: ' + JSON.stringify(data);
+        });
+
+        // Listen for disconnection
+        socket.on('disconnect', function() {
+            // document.getElementById('status').innerText = 'Disconnected from SocketIO server';
+            console.log('Disconnected from SocketIO server');
+        });
+</script>
 <body>
   <!-- Layout wrapper -->
   <div class="layout-wrapper layout-content-navbar">

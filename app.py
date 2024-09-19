@@ -63,14 +63,9 @@ def contact_page():
 
 @app.route('/tables-basic')
 def tables_page():
-    return render_template('tables-basic.html')
-
-# Test route to check WebSocket connection
-@app.route("/dashboard")
-def test_socket():
-    server_url = os.getenv("SERVER")
     hostname = socket.gethostname()
-    return render_template("main.html", socket_url=hostname)
+    # return render_template("main.html", socket_url=hostname)
+    return render_template('tables-basic.html',socket_url=hostname)
 
 
 # Run the app using eventlet
