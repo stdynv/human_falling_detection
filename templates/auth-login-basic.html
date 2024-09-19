@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en" class="light-style layout-wide customizer-hide" dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', filename='') }}" data-template="vertical-menu-template-free" data-style="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>Protect Care - Login</title>
+    <style>
+      .alert {
+    padding: 15px;
+    background-color: #f44336;
+    color: white;
+    margin-top: 20px;
+    border-radius: 5px;
+    text-align: center;
+    }
+
+    .alert-danger {
+        background-color: #ff4444;
+    }
+
+    </style>
+    <meta name="description" content="Login page for Protect Care - Fall Detection System" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
+    
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/css/core.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/css/theme-default.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
+    
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
+    
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/css/pages/page-auth.css') }}" />
+
+    <!-- Helpers -->
+    <script src="{{ url_for('static', filename='vendor/js/helpers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+  </head>
+
+  <body>
+    <div class="container-xxl">
+      <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner">
+          <!-- Login -->
+          <div class="card px-sm-6 px-0">
+            <div class="card-body">
+              <!-- Logo -->
+              <div class="app-brand justify-content-center">
+                <a href="/" class="app-brand-link gap-2">
+                  <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Protect Care" height="150px"/>
+                </a>
+              </div>
+              <!-- /Logo -->
+              
+              <p class="mb-6">Veuillez vous connecter à votre compte pour continuer👋</p>
+
+              <form id="formAuthentication" class="mb-6" action="/api/auth/login" method="POST">
+                <div class="mb-6">
+                  <label for="name" class="form-label">Email ou Nom d'utilisateur</label>
+                  <input type="text" class="form-control" id="name" name="name" placeholder="Entrez votre nom d'utilisateur" autofocus />
+                </div>
+                <div class="mb-6 form-password-toggle">
+                  <label class="form-label" for="password">Mot de passe</label>
+                  <div class="input-group input-group-merge">
+                    <input type="password" id="password" class="form-control" name="password" placeholder="••••••••••••" aria-describedby="password" />
+                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                  </div>
+                </div>
+                <div class="mb-8">
+                  <div class="d-flex justify-content-between mt-8">
+                    <div class="form-check mb-0 ms-2">
+                      <input class="form-check-input" type="checkbox" id="remember-me" />
+                      <label class="form-check-label" for="remember-me"> Se souvenir de moi </label>
+                    </div>
+                    <a href="/auth-forgot-password-basic.html">
+                      <span>Mot de passe oublié?</span>
+                    </a>
+                  </div>
+                  <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+
+                </div>
+                <div class="mb-6">
+                  <button class="btn btn-primary d-grid w-100" type="submit">Se connecter</button>
+                </div>
+                <!-- Message d'erreur -->
+                <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+              
+              </form>
+            </div>
+          </div>
+          <!-- /Login -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Core JS -->
+    <script src="{{ url_for('static', filename='vendor/libs/jquery/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/libs/popper/popper.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/js/bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/js/menu.js') }}"></script>
+
+    <script>
+      document.getElementById('formAuthentication').addEventListener('submit', async function(event) {
+          
+          event.preventDefault(); // Empêche le rechargement de la page
+
+          const name = document.getElementById('name').value;
+          const password_hash = document.getElementById('password').value;
+
+          const response = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ name, password_hash })
+          });
+
+          const result = await response.json();
+
+          if (response.status === 200) {
+              // Stocker le token dans le localStorage
+              localStorage.setItem('token', result.token);
+              // Rediriger vers la page de succès
+              window.location.href = '/tables-basic';
+          } else {
+              // Afficher le message d'erreur
+              document.getElementById('error').innerText = result.message;
+          }
+      });
+    </script>
+
+    <script>
+      document.getElementById('formAuthentication').addEventListener('submit', async function(event) {
+      event.preventDefault(); // Empêche le rechargement de la page
+
+      const name = document.getElementById('name').value;
+      const password_hash = document.getElementById('password').value;
+
+      const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, password_hash })
+      });
+
+      const result = await response.json();
+
+      if (response.status === 200) {
+          // Stocker le token dans le localStorage
+          localStorage.setItem('token', result.token);
+          // Rediriger vers la page de succès
+          window.location.href = '/tables-basic';
+      } else {
+          // Afficher le message d'erreur
+          const errorMessage = document.getElementById('errorMessage');
+          errorMessage.innerText = result.message;
+          errorMessage.style.display = 'block';
+      }
+      });
+
+    </script>
+    
+ 
+
+    <!-- Main JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>

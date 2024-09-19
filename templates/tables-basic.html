@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data--path="{{ url_for('static', filename='') }}" data-template="vertical-menu-template-free" data-style="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+  <title>Dashboard - Protect Care | Détection de Chute</title>
+
+  <meta name="description" content="Dashboard pour les soignants dans les EHPAD pour la détection de chutes." />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='/img/logo.png') }}" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='/vendor/fonts/boxicons.css') }}" />
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='/vendor/css/core.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='/vendor/css/theme-default.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='/css/demo.css') }}" />
+
+  <!-- Vendors CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='/vendor/libs/apex-charts/apex-charts.css') }}" />
+
+  <!-- Helpers -->
+  <script src="{{ url_for('static', filename='/vendor/js/helpers.js') }}"></script>
+  <script src="{{ url_for('static', filename='/js/config.js') }}"></script>
+
+
+  <!-- Custom CSS for Modal Styling -->
+  <style>
+    #alertModal .modal-body {
+      text-align: center;
+    }
+    #alertRoom {
+      font-size: 2.5rem;
+      color: red;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    #alertTimer {
+      font-size: 2rem;
+      color: black;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    #alertTime {
+      font-size: 1.2rem;
+      color: gray;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+<!-- Menu -->
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+  <div class="app-brand demo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; height: auto; box-sizing: border-box;">
+    <a href="/" class="app-brand-link" style="display: flex; align-items: center; justify-content: center; width: 100%; max-width: 200px;">
+      <img src="{{ url_for('static', filename='/img/logo.png') }}" alt="Protect Care Logo" class="app-brand-logo demo" style="max-width: 90%;" />
+    </a>
+    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large d-block d-xl-none" style="margin-top: 10px;">
+      <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
+    </a>
+  </div>
+
+  <div class="menu-inner-shadow"></div>
+
+  <ul class="menu-inner py-1">
+    <li class="menu-item active open">
+      <a href="/tables-basic" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+        <div class="text-truncate">Tableau de Bord</div>
+      </a>
+    </li>
+  
+    <li class="menu-item">
+      <a href="/chambres" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-file"></i>
+        <div class="text-truncate">Chambres</div>
+      </a>
+    </li>
+    <li class="menu-item ">
+      <a href="/contact" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-envelope"></i>
+        <div class="text-truncate">Contact</div>
+      </a>
+    </li>
+  </ul>
+</aside>
+<!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        <!-- Navbar -->
+        <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="container-xxl">
+            <div class="navbar-nav-right d-flex align-items-center">
+              <!-- Notifications -->
+              <ul class="navbar-nav flex-row align-items-center ms-auto">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <i class="bx bx-bell bx-sm"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a class="dropdown-item" href="javascript:void(0);" onclick="showAlertPopup('Chambre 101', '10:45 AM')">
+                        <div class="d-flex align-items-center">
+                          <i class="bx bx-error-alt bx-sm me-2"></i>
+                          <div>
+                            <span>Nouvelle alerte de chute</span>
+                            <small class="d-block text-muted">Chambre 101 - Il y a 5 minutes</small>
+                          </div>
+                        </div>
+                      </a>
+                    </li>
+                    <!-- More notifications -->
+                  </ul>
+                </li>
+                <!-- User Profile -->
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <i class="bx bx-user-circle bx-sm"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/profile">Profil</a></li>
+                    <li><a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">Déconnexion</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="row">
+              <!-- Nombre de Chutes par Mois (Bar Plot) -->
+              <div class="col-lg-8 mb-4">
+                <div class="card">
+                  <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="m-0">Nombre de Chutes par Mois</h5>
+                    <div class="dropdown">
+                      <button class="btn p-0" type="button" id="totalFallsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bx bx-dots-vertical-rounded bx-lg text-muted"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="totalFallsDropdown">
+                        <a class="dropdown-item" href="javascript:void(0);">Sélectionner Tout</a>
+                        <a class="dropdown-item" href="javascript:void(0);">Rafraîchir</a>
+                        <a class="dropdown-item" href="javascript:void(0);">Partager</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="fallsChart" class="px-3" style="height: 300px;"></div>
+                </div>
+              </div>
+
+              <!-- Historique des Dernières Chutes (Vertical Section) -->
+              <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="m-0">Historique des Dernières Chutes</h5>
+                    <div class="dropdown">
+                      <button class="btn p-0" type="button" id="lastFallsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bx bx-dots-vertical-rounded bx-lg"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="lastFallsDropdown">
+                        <a class="dropdown-item" href="javascript:void(0);">Derniers 7 jours</a>
+                        <a class="dropdown-item" href="javascript:void(0);">Dernier mois</a>
+                        <a class="dropdown-item" href="javascript:void(0);">Dernière année</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <ul class="p-0 m-0 list-unstyled">
+                      <li class="d-flex align-items-center mb-4">
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                          <div class="me-2">
+                            <small class="d-block">Chambre 101</small>
+                            <h6 class="fw-normal mb-0">Chute détectée</h6>
+                          </div>
+                          <div class="user-progress d-flex align-items-center gap-2">
+                            <h6 class="fw-normal mb-0">10:15</h6>
+                            <span class="text-muted">AM</span>
+                          </div>
+                        </div>
+                      </li>
+                      <!-- Repeat for other falls -->
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chutes Aujourd'hui -->
+              <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">Chutes Aujourd'hui</h5>
+                    <h2 class="card-title text-danger mb-3">5</h2>
+                    <small class="text-muted">-2% par rapport à hier</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Alertes Actives avec Notification -->
+              <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="m-0">Alertes Actives</h5>
+                    <div class="dropdown">
+                      <button class="btn p-0" type="button" id="activeAlertsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bx bx-dots-vertical-rounded"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="activeAlertsDropdown">
+                        <a class="dropdown-item" href="javascript:void(0);">Rafraîchir</a>
+                        <a class="dropdown-item" href="javascript:void(0);">Marquer comme lue</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Si Pas d'Alerte -->
+                    <div class="alert alert-light text-center">Pas d'alerte</div>
+                    <!-- Si Alerte -->
+                    <div class="alert alert-danger d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>Chambre 101</strong> - Chute détectée
+                      </div>
+                      <small>10:45 AM</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Statut des Chambres avec plus d'exemples -->
+              <div class="col-lg-12 mb-4">
+                <div class="card">
+                  <h5 class="card-header">Statut des Chambres</h5>
+                  <div class="table-responsive text-nowrap">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Chambre</th>
+                          <th>État</th>
+                          <th>Dernière Mise à Jour</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody class="table-border-bottom-0">
+                        <tr>
+                          <td>101</td>
+                          <td><span class="badge bg-label-danger me-1">Chute</span></td>
+                          <td>Il y a 10 min</td>
+                          <td>
+                            <div class="dropdown">
+                              <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu">
+                                <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-edit-alt me-1"></i> Réinitialiser</a>
+                                <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-trash me-1"></i> Supprimer</a>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                        <!-- More examples as needed -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- / Content -->
+        </div>
+        <!-- Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+    </div>
+
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
+
+  <!-- Modal for Alerts -->
+  <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="alertModalLabel">Nouvelle Alerte de Chute</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="alertRoom"></p>
+          <p id="alertTimer">00:00</p>
+          <p id="alertTime"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="markAsSeenButton" onclick="markAsSeen()">Vue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JS -->
+   
+  <script src="{{ url_for('static', filename='/vendor/libs/jquery/jquery.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/libs/popper/popper.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/js/bootstrap.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/js/menu.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/libs/apex-charts/apexcharts.js') }}"></script>
+  <script src="{{ url_for('static', filename='/js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='/js/dashboards-analytics.js') }}"></script>
+
+  <!-- JavaScript to Handle Alert Modal with Timer -->
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = "/";
+      }
+
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        window.location.href = "/";
+      });
+    });
+  </script>
+  <script>
+    var timerInterval;
+
+    function showAlertPopup(room, time) {
+      document.getElementById('alertRoom').textContent = room;
+      document.getElementById('alertTime').textContent = time;
+      startTimer();
+      var alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+      alertModal.show();
+    }
+
+    function startTimer() {
+      var timerDisplay = document.getElementById('alertTimer');
+      var seconds = 0;
+      timerInterval = setInterval(function() {
+        seconds++;
+        var minutes = Math.floor(seconds / 60);
+        var remainingSeconds = seconds % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    function markAsSeen() {
+      clearInterval(timerInterval);
+      var alertModal = bootstrap.Modal.getInstance(document.getElementById('alertModal'));
+      alertModal.hide();
+    }
+  </script>
+
+  <!-- Bar Chart Configuration -->
+  <script>
+    var options = {
+      series: [{
+        name: 'Chutes',
+        data: [5, 8, 7, 10, 9, 4, 6, 7, 5, 9, 10, 12]
+      }],
+      chart: {
+        type: 'bar',
+        height: 300,
+        toolbar: {
+          show: false
+        }
+      },
+      colors: ['#1E90FF'],
+      plotOptions: {
+        bar: {
+          borderRadius: 5,
+          horizontal: false,
+          columnWidth: '60%',
+          endingShape: 'rounded',
+          startingShape: 'rounded',
+          dataLabels: {
+            position: 'top'
+          }
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: function (val) {
+          return val;
+        },
+        offsetY: -20,
+        style: {
+          fontSize: '12px',
+          colors: ['#304758']
+        }
+      },
+      xaxis: {
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        position: 'bottom',
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        },
+        crosshairs: {
+          fill: {
+            type: 'gradient',
+            gradient: {
+              colorFrom: '#D8E3F0',
+              colorTo: '#BED1E6',
+              stops: [0, 100],
+              opacityFrom: 0.4,
+              opacityTo: 0.5
+            }
+          }
+        },
+        tooltip: {
+          enabled: true
+        }
+      },
+      yaxis: {
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        },
+        labels: {
+          show: true,
+          formatter: function (val) {
+            return val;
+          }
+        }
+      },
+      grid: {
+        borderColor: '#f1f1f1',
+        strokeDashArray: 5,
+      }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#fallsChart"), options);
+    chart.render();
+  </script>
+</body>
+</html>
