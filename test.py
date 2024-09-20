@@ -13,8 +13,27 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Raspberry Pi ID and room information
 rooms_url = "https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/api/rooms/"
-desired_raspberry_id = "RPI12345"  # The Raspberry Pi ID to search for
-room_number = '101'
+desired_raspberry_id = "RPI123456"  # The Raspberry Pi ID to search for
+room_number = None
+
+try:
+    response = requests.get(rooms_url)
+    response.raise_for_status()
+    rooms_data = response.json()
+    # Rechercher le room_number associé au raspberry_id désiré
+    for room in rooms_data:
+        if room['raspberry_id'] == desired_raspberry_id:
+            room_number = room['room_number']
+            break
+    if room_number:
+        logging.info(f"Raspberry ID {desired_raspberry_id} trouvé, numéro de chambre: {room_number}")
+    else:
+        logging.error(f"Raspberry ID {desired_raspberry_id} introuvable dans les données récupérées.")
+        room_number = "Unknown"  # Valeur par défaut si non trouvé
+except requests.exceptions.RequestException as e:
+    logging.error(f"Erreur lors de la récupération des données des chambres : {e}")
+    room_number = "Unknown"  # Valeur par défaut en cas d'erreur
+
 
 # Initialize BlazePose
 mp_pose = mp.solutions.pose
@@ -49,6 +68,7 @@ person_count = 0
 # Azure Blob Storage details
 CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=humanfalldata;AccountKey=Bw15KNlxPKxgypqTw/0Wrwz+n8vfNg7KVWuTB6LnFw2c1k5PvUE8nGSk/5ti5Z37+ww5bTY7SCeE+AStxO6ugA==;EndpointSuffix=core.windows.net"
 CONTAINER_NAME = "videocontainer"
+incident_url = "https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/api/incidents/create"
 
 # Initialize Azure Blob Uploader
 azure_uploader = az.AzureBlobUploader(CONNECTION_STRING, CONTAINER_NAME)
@@ -127,10 +147,24 @@ while True:
             # Upload the video to Azure Blob Storage
             if os.path.exists(video_file_name):
                 try:
-                    azure_uploader.upload_video(video_file_name)
+                    sas_url = azure_uploader.upload_video(video_file_name)
                     logging.info(f"Vidéo téléchargée avec succès : {video_file_name}")
+                    incident_data = {
+                                'raspberry_id': desired_raspberry_id,
+                                'incident_date': fall_time,
+                                'description': f'Fall detected in room {room_number}',
+                                'video_url': sas_url,
+                                'status': 'pending'
+                            }
+                    # insert incidnet 
+                    incident_response = requests.post(incident_url, json=incident_data)
+                    if incident_response.status_code == 201:
+                        logging.info("Incident signalé avec succès.")
+                    else:
+                        logging.error(f"Erreur lors de la signalisation de l'incident : {incident_response.text}")
                     os.remove(video_file_name)
                     logging.info(f"Fichier vidéo local supprimé : {video_file_name}")
+                
                 except Exception as e:
                     logging.error(f"Erreur lors du téléchargement de la vidéo : {e}")
             else:
