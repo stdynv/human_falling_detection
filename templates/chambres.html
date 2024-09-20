@@ -142,7 +142,7 @@
 });
 
 function fetchRooms() {
-  fetch('/api/rooms/')
+  fetch('{{ url_for("rooms_bp.get_rooms") }}')
     .then(response => response.json())
     .then(data => {
       const roomsTable = document.getElementById('roomsData');
