@@ -9,7 +9,6 @@ import os
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-
 app = Flask(__name__)
 
 
