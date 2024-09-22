@@ -31,7 +31,6 @@
   <script src="{{ url_for('static', filename='/vendor/js/helpers.js') }}"></script>
   <script src="{{ url_for('static', filename='/js/config.js') }}"></script>
 
-
   <!-- Custom CSS for Modal Styling -->
   <style>
     #alertModal .modal-body {
@@ -49,82 +48,62 @@
       font-weight: bold;
       margin-bottom: 1rem;
     }
-    #alertTime {
-      font-size: 1.2rem;
-      color: gray;
+    #alertVideoPlayer {
+      width: 100%;
+      height: auto;
+      margin-top: 20px;
     }
   </style>
+
+  <!-- Include dayjs library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 </head>
-<script type="text/javascript">
-  var socket = io('{{server_url}}', {
-            transports: ['websocket'],  // Forces WebSocket only
-            reconnection: true,
-            reconnectionAttempts: 5,    // Adjust this to suit your needs
-            reconnectionDelay: 2000     // Delay reconnection attempts to avoid flooding
-        });
-    
-        // Listen for connection
-        socket.on('connect', function() {
-            // document.getElementById('status').innerText = 'Connected to SocketIO server!';
-            console.log('Connected to SocketIO server');
-        });
 
-        // Listen for the 'notification' event (or correct event name)
-        socket.on('notification', function(data) {
-            console.log('New incident received:', data);
-            // document.getElementById('message').innerText = 'New incident: ' + JSON.stringify(data);
-        });
-
-        // Listen for disconnection
-        socket.on('disconnect', function() {
-            // document.getElementById('status').innerText = 'Disconnected from SocketIO server';
-            console.log('Disconnected from SocketIO server');
-        });
-</script>
 <body>
   <!-- Layout wrapper -->
   <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
-<!-- Menu -->
-<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-  <div class="app-brand demo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; height: auto; box-sizing: border-box;">
-    <a href="/" class="app-brand-link" style="display: flex; align-items: center; justify-content: center; width: 100%; max-width: 200px;">
-      <img src="{{ url_for('static', filename='/img/logo.png') }}" alt="Protect Care Logo" class="app-brand-logo demo" style="max-width: 90%;" />
-    </a>
-    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large d-block d-xl-none" style="margin-top: 10px;">
-      <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
-    </a>
-  </div>
 
-  <div class="menu-inner-shadow"></div>
+      <!-- Sidebar -->
+      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+        <div class="app-brand demo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; height: auto; box-sizing: border-box;">
+          <a href="/" class="app-brand-link" style="display: flex; align-items: center; justify-content: center; width: 100%; max-width: 200px;">
+            <img src="{{ url_for('static', filename='/img/logo.png') }}" alt="Protect Care Logo" class="app-brand-logo demo" style="max-width: 90%;" />
+          </a>
+          <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large d-block d-xl-none" style="margin-top: 10px;">
+            <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
+          </a>
+        </div>
 
-  <ul class="menu-inner py-1">
-    <li class="menu-item active open">
-      <a href="/tables-basic" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
-        <div class="text-truncate">Tableau de Bord</div>
-      </a>
-    </li>
-  
-    <li class="menu-item">
-      <a href="/chambres" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-file"></i>
-        <div class="text-truncate">Chambres</div>
-      </a>
-    </li>
-    <li class="menu-item ">
-      <a href="/contact" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-envelope"></i>
-        <div class="text-truncate">Contact</div>
-      </a>
-    </li>
-  </ul>
-</aside>
-<!-- / Menu -->
+        <div class="menu-inner-shadow"></div>
 
-      <!-- Layout container -->
+        <ul class="menu-inner py-1">
+          <li class="menu-item active open">
+            <a href="/tables-basic" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+              <div class="text-truncate">Tableau de Bord</div>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/chambres" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-file"></i>
+              <div class="text-truncate">Chambres</div>
+            </a>
+          </li>
+          <li class="menu-item ">
+            <a href="/contact" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-envelope"></i>
+              <div class="text-truncate">Contact</div>
+            </a>
+          </li>
+        </ul>
+      </aside>
+      <!-- /Sidebar -->
+
+      <!-- Layout page -->
       <div class="layout-page">
         <!-- Navbar -->
         <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
@@ -148,7 +127,6 @@
                         </div>
                       </a>
                     </li>
-                    <!-- More notifications -->
                   </ul>
                 </li>
                 <!-- User Profile -->
@@ -165,7 +143,7 @@
             </div>
           </div>
         </nav>
-        <!-- / Navbar -->
+        <!-- /Navbar -->
 
         <!-- Content wrapper -->
         <div class="content-wrapper">
@@ -181,14 +159,9 @@
                       <button class="btn p-0" type="button" id="totalFallsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="bx bx-dots-vertical-rounded bx-lg text-muted"></i>
                       </button>
-                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="totalFallsDropdown">
-                        <a class="dropdown-item" href="javascript:void(0);">Sélectionner Tout</a>
-                        <a class="dropdown-item" href="javascript:void(0);">Rafraîchir</a>
-                        <a class="dropdown-item" href="javascript:void(0);">Partager</a>
-                      </div>
                     </div>
                   </div>
-                  <div id="fallsChart" class="px-3" style="height: 300px;"></div>
+                  <div id="fallsChart" class="px-3" style="height: 300px;"></div> <!-- Le graphique sera rendu ici -->
                 </div>
               </div>
 
@@ -197,32 +170,10 @@
                 <div class="card h-100">
                   <div class="card-header d-flex align-items-center justify-content-between">
                     <h5 class="m-0">Historique des Dernières Chutes</h5>
-                    <div class="dropdown">
-                      <button class="btn p-0" type="button" id="lastFallsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="bx bx-dots-vertical-rounded bx-lg"></i>
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="lastFallsDropdown">
-                        <a class="dropdown-item" href="javascript:void(0);">Derniers 7 jours</a>
-                        <a class="dropdown-item" href="javascript:void(0);">Dernier mois</a>
-                        <a class="dropdown-item" href="javascript:void(0);">Dernière année</a>
-                      </div>
-                    </div>
                   </div>
                   <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                    <ul class="p-0 m-0 list-unstyled">
-                      <li class="d-flex align-items-center mb-4">
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                          <div class="me-2">
-                            <small class="d-block">Chambre 101</small>
-                            <h6 class="fw-normal mb-0">Chute détectée</h6>
-                          </div>
-                          <div class="user-progress d-flex align-items-center gap-2">
-                            <h6 class="fw-normal mb-0">10:15</h6>
-                            <span class="text-muted">AM</span>
-                          </div>
-                        </div>
-                      </li>
-                      <!-- Repeat for other falls -->
+                    <ul id="latestFallsList" class="p-0 m-0 list-unstyled">
+                      <!-- Les incidents récents seront insérés ici -->
                     </ul>
                   </div>
                 </div>
@@ -231,10 +182,10 @@
               <!-- Chutes Aujourd'hui -->
               <div class="col-lg-4 mb-4">
                 <div class="card h-100">
-                  <div class="card-body text-center">
+                  <div class="card-body text-center chutes-aujourd-hui">
                     <h5 class="card-title">Chutes Aujourd'hui</h5>
-                    <h2 class="card-title text-danger mb-3">5</h2>
-                    <small class="text-muted">-2% par rapport à hier</small>
+                    <h2 class="card-title text-danger mb-3">0</h2> <!-- Le nombre sera mis à jour ici -->
+                    <small class="text-muted">Par rapport à hier</small>
                   </div>
                 </div>
               </div>
@@ -244,26 +195,9 @@
                 <div class="card h-100">
                   <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="m-0">Alertes Actives</h5>
-                    <div class="dropdown">
-                      <button class="btn p-0" type="button" id="activeAlertsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="bx bx-dots-vertical-rounded"></i>
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="activeAlertsDropdown">
-                        <a class="dropdown-item" href="javascript:void(0);">Rafraîchir</a>
-                        <a class="dropdown-item" href="javascript:void(0);">Marquer comme lue</a>
-                      </div>
-                    </div>
                   </div>
                   <div class="card-body" style="max-height: 300px; overflow-y: auto;">
-                    <!-- Si Pas d'Alerte -->
                     <div class="alert alert-light text-center">Pas d'alerte</div>
-                    <!-- Si Alerte -->
-                    <div class="alert alert-danger d-flex justify-content-between align-items-center">
-                      <div>
-                        <strong>Chambre 101</strong> - Chute détectée
-                      </div>
-                      <small>10:45 AM</small>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -307,17 +241,17 @@
               </div>
             </div>
           </div>
-          <!-- / Content -->
+          <!-- /Content -->
         </div>
-        <!-- Content wrapper -->
+        <!-- /Content wrapper -->
       </div>
-      <!-- / Layout page -->
+      <!-- /Layout page -->
     </div>
 
     <!-- Overlay -->
     <div class="layout-overlay layout-menu-toggle"></div>
   </div>
-  <!-- / Layout wrapper -->
+  <!-- /Layout wrapper -->
 
   <!-- Modal for Alerts -->
   <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
@@ -330,7 +264,11 @@
         <div class="modal-body">
           <p id="alertRoom"></p>
           <p id="alertTimer">00:00</p>
-          <p id="alertTime"></p>
+          <!-- Video Player -->
+          <video id="alertVideoPlayer" controls>
+            <source id="alertVideoSource" src="" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" id="markAsSeenButton" onclick="markAsSeen()">Vue</button>
@@ -339,44 +277,51 @@
     </div>
   </div>
 
-  <!-- Core JS -->
-   
-  <script src="{{ url_for('static', filename='/vendor/libs/jquery/jquery.js') }}"></script>
-  <script src="{{ url_for('static', filename='/vendor/libs/popper/popper.js') }}"></script>
-  <script src="{{ url_for('static', filename='/vendor/js/bootstrap.js') }}"></script>
-  <script src="{{ url_for('static', filename='/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
-  <script src="{{ url_for('static', filename='/vendor/js/menu.js') }}"></script>
-  <script src="{{ url_for('static', filename='/vendor/libs/apex-charts/apexcharts.js') }}"></script>
-  <script src="{{ url_for('static', filename='/js/main.js') }}"></script>
-  <script src="{{ url_for('static', filename='/js/dashboards-analytics.js') }}"></script>
-
-  <!-- JavaScript to Handle Alert Modal with Timer -->
-  
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const token = localStorage.getItem('token');
-
-      if (!token) {
-        window.location.href = "/";
-      }
-
-      document.getElementById('logoutBtn').addEventListener('click', function() {
-        localStorage.removeItem('token');
-        window.location.href = "/";
-      });
+  <!-- JavaScript to Handle Alert Modal with Timer and WebSocket Integration -->
+  <script type="text/javascript">
+    var socket = io('{{server_url}}', {
+      transports: ['websocket'],  // Forces WebSocket only
+      reconnection: true,
+      reconnectionAttempts: 5,    // Adjust this to suit your needs
+      reconnectionDelay: 2000     // Delay reconnection attempts to avoid flooding
     });
-  </script>
-  <script>
+
+    // Listen for connection
+    socket.on('connect', function() {
+        console.log('Connected to SocketIO server');
+    });
+
+    // Listen for the 'notification' event
+    socket.on('notification', function(data) {
+        console.log('New incident received:', data);
+
+        // Extract room number, video URL, and display the popup with the correct values
+        const room = data.message.split("Room ")[1] || "Unknown";  // Extract room number
+        const videoUrl = data.video_url;  // Extract video URL
+
+        // Display the alert popup with the room number and video player
+        showAlertPopup(room, videoUrl);
+    });
+
+    // Listen for disconnection
+    socket.on('disconnect', function() {
+        console.log('Disconnected from SocketIO server');
+    });
+
     var timerInterval;
 
-    function showAlertPopup(room, time) {
-      document.getElementById('alertRoom').textContent = room;
-      document.getElementById('alertTime').textContent = time;
+    // Function to show the alert popup
+    function showAlertPopup(room, videoUrl) {
+      document.getElementById('alertRoom').textContent = "Chambre " + room;
+      document.getElementById('alertVideoSource').src = videoUrl;
+      document.getElementById('alertVideoPlayer').load();  // Reload the video player with the new source
       startTimer();
+
       var alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
       alertModal.show();
     }
 
+    // Function to start the timer
     function startTimer() {
       var timerDisplay = document.getElementById('alertTimer');
       var seconds = 0;
@@ -388,98 +333,137 @@
       }, 1000);
     }
 
+    // Function to mark the alert as seen and stop the timer
     function markAsSeen() {
       clearInterval(timerInterval);
       var alertModal = bootstrap.Modal.getInstance(document.getElementById('alertModal'));
       alertModal.hide();
     }
-  </script>
 
-  <!-- Bar Chart Configuration -->
-  <script>
-    var options = {
-      series: [{
-        name: 'Chutes',
-        data: [5, 8, 7, 10, 9, 4, 6, 7, 5, 9, 10, 12]
-      }],
-      chart: {
-        type: 'bar',
-        height: 300,
-        toolbar: {
-          show: false
-        }
-      },
-      colors: ['#1E90FF'],
-      plotOptions: {
-        bar: {
-          borderRadius: 5,
-          horizontal: false,
-          columnWidth: '60%',
-          endingShape: 'rounded',
-          startingShape: 'rounded',
-          dataLabels: {
-            position: 'top'
-          }
-        }
-      },
-      dataLabels: {
-        enabled: true,
-        formatter: function (val) {
-          return val;
-        },
-        offsetY: -20,
-        style: {
-          fontSize: '12px',
-          colors: ['#304758']
-        }
-      },
-      xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        position: 'bottom',
-        axisBorder: {
-          show: false
-        },
-        axisTicks: {
-          show: false
-        },
-        crosshairs: {
-          fill: {
-            type: 'gradient',
-            gradient: {
-              colorFrom: '#D8E3F0',
-              colorTo: '#BED1E6',
-              stops: [0, 100],
-              opacityFrom: 0.4,
-              opacityTo: 0.5
-            }
-          }
-        },
-        tooltip: {
-          enabled: true
-        }
-      },
-      yaxis: {
-        axisBorder: {
-          show: false
-        },
-        axisTicks: {
-          show: false
-        },
-        labels: {
-          show: true,
-          formatter: function (val) {
-            return val;
-          }
-        }
-      },
-      grid: {
-        borderColor: '#f1f1f1',
-        strokeDashArray: 5,
+    document.addEventListener("DOMContentLoaded", function () {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = "/";
       }
-    };
 
-    var chart = new ApexCharts(document.querySelector("#fallsChart"), options);
-    chart.render();
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        window.location.href = "/";
+      });
+
+      // Requête pour récupérer les chutes d'aujourd'hui
+      fetch('/api/incidents/today-incidents')
+        .then(response => response.json())
+        .then(data => {
+          if (data.incidents_count !== undefined) {
+            const todayFallsElement = document.querySelector('.chutes-aujourd-hui h2');
+
+            // Mettre à jour le texte pour afficher le nombre de chutes d'aujourd'hui
+            todayFallsElement.textContent = data.incidents_count;
+          }
+        })
+        .catch(error => console.error('Error fetching today incidents:', error));
+
+      // Requête pour récupérer les dernières chutes
+      fetch('/api/incidents/latest-incidents')
+        .then(response => response.json())
+        .then(data => {
+          if (data.incidents) {
+            const incidentList = document.getElementById('latestFallsList');
+            incidentList.innerHTML = ''; // Vider la liste actuelle
+
+            data.incidents.forEach(incident => {
+              const incidentDate = dayjs(incident.incident_date); // Utilisation de dayjs pour formater la date
+
+              const listItem = document.createElement('li');
+              listItem.className = 'd-flex align-items-center mb-4';
+              listItem.innerHTML = `
+                <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                  <div class="me-2">
+                    <small class="d-block">Chambre ${incident.room_number}</small>
+                    <h6 class="fw-normal mb-0">Chute détectée</h6>
+                  </div>
+                  <div class="user-progress d-flex align-items-center gap-2">
+                    <h6 class="fw-normal mb-0">${incidentDate.format('HH:mm')}</h6>
+                    <span class="text-muted">${incidentDate.format('YYYY/MM/DD')}</span>
+                  </div>
+                  <div>
+                    <a href="${incident.video_url}" target="_blank">Voir la vidéo</a>
+                  </div>
+                </div>
+              `;
+              incidentList.appendChild(listItem);
+            });
+          }
+        })
+        .catch(error => console.error('Error fetching latest incidents:', error));
+
+      // Appel à l'API pour obtenir le nombre de chutes par mois
+      fetch('/api/incidents/incidents-per-month')
+        .then(response => response.json())
+        .then(data => {
+          if (data.incidents_by_month) {
+            const months = data.incidents_by_month.map(item => item.month);  // Mois
+            const counts = data.incidents_by_month.map(item => item.incident_count);  // Nombre de chutes
+
+            // Options pour le graphique ApexCharts
+            const options = {
+              series: [{
+                name: 'Chutes',
+                data: counts
+              }],
+              chart: {
+                type: 'bar',
+                height: 300,
+                toolbar: {
+                  show: false
+                }
+              },
+              xaxis: {
+                categories: months,  // Mois
+                title: {
+                  text: 'Mois'
+                }
+              },
+              yaxis: {
+                title: {
+                  text: 'Nombre de Chutes'
+                }
+              },
+              plotOptions: {
+                bar: {
+                  borderRadius: 5,
+                  horizontal: false,
+                  columnWidth: '60%',
+                }
+              },
+              dataLabels: {
+                enabled: true,
+                formatter: function (val) {
+                  return val;
+                },
+              }
+            };
+
+            // Rendre le graphique
+            const chart = new ApexCharts(document.querySelector("#fallsChart"), options);
+            chart.render();
+          }
+        })
+        .catch(error => console.error('Error fetching incidents per month:', error));
+    });
   </script>
+
+  <!-- Core JS -->
+  <script src="{{ url_for('static', filename='/vendor/libs/jquery/jquery.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/libs/popper/popper.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/js/bootstrap.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/js/menu.js') }}"></script>
+  <script src="{{ url_for('static', filename='/vendor/libs/apex-charts/apexcharts.js') }}"></script>
+  <script src="{{ url_for('static', filename='/js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='/js/dashboards-analytics.js') }}"></script>
+
 </body>
 </html>
