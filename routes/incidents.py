@@ -5,15 +5,18 @@ from datetime import datetime, timedelta
 from sqlalchemy import func
 from models import Incident, Room
 from extensions import db, socketio
+import pytz 
 
 incidents_bp = Blueprint("incidents_bp", __name__)
+
+tz = pytz.timezone('Europe/Paris')
 
 # Endpoint pour créer un nouvel incident
 @incidents_bp.route("/create", methods=["POST"])
 def create_incident():
     try:
         data = request.get_json()
-        incident_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        incident_date = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
         logging.info(incident_date)
 
         # Create new incident
