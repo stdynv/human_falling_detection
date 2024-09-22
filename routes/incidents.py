@@ -50,6 +50,7 @@ def create_incident():
                     "message": message,
                     "incident_date": str(incident_date),
                     "video_url": new_incident.video_url,
+                    "room_number": room.room_number,
                 },
             )
             logging.info(f"Notification emitted: {message}")

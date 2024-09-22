@@ -13,7 +13,6 @@ from itsdangerous import URLSafeTimedSerializer
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-
 app = Flask(__name__)
 
 
