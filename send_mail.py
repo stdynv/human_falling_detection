@@ -7,7 +7,7 @@ def send_password_reset_email(user_email, reset_token):
     receiver = user_email
 
     # Create the reset link (you can adjust the URL based on your frontend)
-    reset_link = f"http://localhost:8000/reset-password?token={reset_token}"
+    reset_link = f"https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/reset-password?token={reset_token}"
 
     # Create the email message
     message = MIMEMultipart("alternative")
