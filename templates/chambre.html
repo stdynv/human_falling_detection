@@ -1,86 +1,77 @@
 <!doctype html>
 
-<html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free" data-style="light">
+<html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', filename='') }}" data-template="vertical-menu-template-free" data-style="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Dashboard - Soignants | Détection de Chute</title>
-
-    <meta name="description" content="Dashboard pour les soignants dans les EHPAD pour la détection de chutes." />
+    <title>Chambre {{ room.room_number }} - Gestion | Détection de Chute</title>
+    <meta name="description" content="Détails d'une chambre pour la gestion de chutes dans un EHPAD." />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon/favicon.ico') }}" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-    <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fonts/boxicons.css') }}" />
 
     <!-- Core CSS -->
-    <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="../assets/css/demo.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/css/core.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/css/theme-default.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
 
     <!-- Vendors CSS -->
-    <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <link rel="stylesheet" href="../assets/vendor/libs/apex-charts/apex-charts.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/libs/apex-charts/apex-charts.css') }}" />
 
     <!-- Helpers -->
-    <script src="../assets/vendor/js/helpers.js"></script>
-    <script src="../assets/js/config.js"></script>
+    <script src="{{ url_for('static', filename='vendor/js/helpers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
   </head>
 
   <body>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
-             <!-- Menu -->
-<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-  <div class="app-brand demo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; height: auto; box-sizing: border-box;">
-    <a href="index.html" class="app-brand-link" style="display: flex; align-items: center; justify-content: center; width: 100%; max-width: 200px;">
-      <img src="/assets/img/logo.png" alt="Protect Care Logo" class="app-brand-logo demo" style="max-width: 90%; height: auto; display: block; margin: 0 auto;" />
-    </a>
-    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large d-block d-xl-none" style="margin-top: 10px;">
-      <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
-    </a>
-  </div>
-
-  <div class="menu-inner-shadow"></div>
-
-  <ul class="menu-inner py-1">
-    <li class="menu-item ">
-      <a href="tables-basic.html" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
-        <div class="text-truncate">Tableau de Bord</div>
-      </a>
-    </li>
-  
-    <li class="menu-item active open">
-      <a href="chambres.html" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-file"></i>
-        <div class="text-truncate">Chambres</div>
-      </a>
-    </li>
-    <li class="menu-item ">
-      <a href="contact.html" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-envelope"></i>
-        <div class="text-truncate">Contact</div>
-      </a>
-    </li>
-  </ul>
-</aside>
-<!-- / Menu -->
+        <!-- Menu -->
+        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+          <div class="app-brand demo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; height: auto; box-sizing: border-box;">
+            <a href="/" class="app-brand-link" style="display: flex; align-items: center; justify-content: center; width: 100%; max-width: 200px;">
+              <img src="{{ url_for('static', filename='/img/logo.png') }}" alt="Protect Care Logo" class="app-brand-logo demo" style="max-width: 90%;" />
+            </a>
+          </div>
+          <div class="menu-inner-shadow"></div>
+          <ul class="menu-inner py-1">
+            <li class="menu-item">
+              <a href="/tables-basic" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+                <div>Tableau de Bord</div>
+              </a>
+            </li>
+            <li class="menu-item active">
+              <a href="/chambres" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-file"></i>
+                <div>Chambres</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="/contact" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div>Contact</div>
+              </a>
+            </li>
+          </ul>
+        </aside>
 
         <!-- Layout container -->
         <div class="layout-page">
           <!-- Navbar -->
-          <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar" style="background-color: transparent;">
+          <nav class="layout-navbar navbar navbar-expand-xl navbar-detached bg-navbar-theme">
             <div class="container-xxl">
               <div class="navbar-nav-right d-flex align-items-center">
-                <!-- Notifications -->
                 <ul class="navbar-nav flex-row align-items-center ms-auto">
                   <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -93,22 +84,19 @@
                             <i class="bx bx-error-alt bx-sm me-2"></i>
                             <div>
                               <span>Nouvelle alerte de chute</span>
-                              <small class="d-block text-muted">Chambre 101 - Il y a 5 minutes</small>
+                              <small class="text-muted">Chambre {{ room.room_number }} - Il y a 5 minutes</small>
                             </div>
                           </div>
                         </a>
                       </li>
-                      <!-- More notifications -->
                     </ul>
                   </li>
-                  <!-- User Profile -->
                   <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                       <i class="bx bx-user-circle bx-sm"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                      <li><a class="dropdown-item" href="profiles.html">Profil</a></li>
-                      <li><a class="dropdown-item" href="settings.html">Paramètres</a></li>
+                      <li><a class="dropdown-item" href="/profile">Profil</a></li>
                       <li><a class="dropdown-item" href="javascript:void(0);">Déconnexion</a></li>
                     </ul>
                   </li>
@@ -116,28 +104,29 @@
               </div>
             </div>
           </nav>
-          <!-- / Navbar -->
-
           <!-- Content wrapper -->
           <div class="content-wrapper">
             <!-- Content -->
             <div class="container-xxl flex-grow-1 container-p-y">
               <div class="row">
-                <!-- Chambre Details -->
                 <div class="col-lg-12 mb-4">
                   <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                      <h5 class="m-0">Chambre 101 - Détails</h5>
+                      <h5 class="m-0">Chambre {{ room.room_number }} - Détails</h5>
                       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editRoomModal">Modifier Chambre</button>
                     </div>
                     <div class="card-body">
+                      <h6>Informations Générales</h6>
+                      <p><strong>Numéro de Chambre :</strong> {{ room.room_number }}</p>
+                      <p><strong>Étage :</strong> {{ room.floor }}</p>
+                      <p><strong>Type de Chambre :</strong> {{ room.type }}</p>
+                      <p><strong>Statut :</strong> {{ 'Occupée' if room.occupied else 'Disponible' }}</p>
+                      <p><strong>ID Raspberry :</strong> {{ room.raspberry_id }}</p>
                       <h6>Nombre de Chutes</h6>
-                      <p>5 chutes détectées ce mois-ci.</p>
+                      <p>{{ incident_count }} chutes détectées ce mois-ci.</p>
                     </div>
                   </div>
                 </div>
-
-                <!-- Historique des Chutes (Tableau) -->
                 <div class="col-lg-12 mb-4">
                   <div class="card">
                     <h5 class="card-header">Historique des Chutes</h5>
@@ -151,99 +140,48 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>10/09/2024 - 10:15 AM</td>
-                            <td><span class="badge bg-danger">Chute détectée</span></td>
-                            <td><button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#videoModal1">Regarder</button></td>
-                          </tr>
-                          <tr>
-                            <td>05/09/2024 - 11:30 AM</td>
-                            <td><span class="badge bg-danger">Chute détectée</span></td>
-                            <td><button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#videoModal2">Regarder</button></td>
-                          </tr>
-                          <!-- More rows as needed -->
+                          {% for incident in incidents %}
+                            <tr>
+                              <td>{{ incident.date_time }}</td>
+                              <td><span class="badge bg-danger">Chute détectée</span></td>
+                              <td><button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#videoModal{{ incident.id }}">Regarder</button></td>
+                            </tr>
+                          {% endfor %}
                         </tbody>
                       </table>
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
-            <!-- / Content -->
           </div>
           <!-- Content wrapper -->
         </div>
-        <!-- / Layout page -->
+        <!-- Layout page -->
       </div>
-
-      <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
     </div>
-    <!-- / Layout wrapper -->
-
-    <!-- Video Modal -->
-    <div class="modal fade" id="videoModal1" tabindex="-1" aria-labelledby="videoModal1Label" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="videoModal1Label">Vidéo 1</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <!-- Embed or Video Player Code Here -->
-            <p>Video Player Placeholder for Vidéo 1</p>
+    <!-- Video Modal Template -->
+    {% for incident in incidents %}
+      <div class="modal fade" id="videoModal{{ incident.id }}" tabindex="-1" aria-labelledby="videoModalLabel{{ incident.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="videoModalLabel{{ incident.id }}">Vidéo {{ incident.id }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Video Player Placeholder for Vidéo {{ incident.id }}</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="modal fade" id="videoModal2" tabindex="-1" aria-labelledby="videoModal2Label" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="videoModal2Label">Vidéo 2</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <!-- Embed or Video Player Code Here -->
-            <p>Video Player Placeholder for Vidéo 2</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit Room Modal -->
-    <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editRoomModalLabel">Modifier Chambre</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <!-- Form to edit room details -->
-            <form>
-              <div class="mb-3">
-                <label for="roomNumber" class="form-label">Numéro de Chambre</label>
-                <input type="text" class="form-control" id="roomNumber" value="101">
-              </div>
-              <div class="mb-3">
-                <label for="roomNumber" class="form-label">Id du Raspeberry</label>
-                <input type="text" class="form-control" id="roomNumber" value="101">
-              </div>
-              <button type="submit" class="btn btn-primary">Sauvegarder</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+    {% endfor %}
 
     <!-- Core JS -->
-    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="../assets/vendor/libs/popper/popper.js"></script>
-    <script src="../assets/vendor/js/bootstrap.js"></script>
-    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="../assets/vendor/js/menu.js"></script>
+    <script src="{{ url_for('static', filename='vendor/libs/jquery/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/libs/popper/popper.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/js/bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/js/menu.js') }}"></script>
   </body>
 </html>

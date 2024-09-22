@@ -13,17 +13,19 @@ class Room(db.Model):
     floor = db.Column(db.String(10), nullable=False)
     type = db.Column(db.String(20))
     occupied = db.Column(db.Boolean, default=False)
-    raspberry_id = db.Column(db.String(100))
-
+    raspberry_id = db.Column(db.String(100), unique=True)
+    incidents = db.relationship('Incident', backref='room', cascade='all, delete-orphan')
 
 class Incident(db.Model):
     __tablename__ = "Incidents"
+
     incident_id = db.Column(db.Integer, primary_key=True)
-    raspberry_id = db.Column(db.String(50))
+    raspberry_id = db.Column(db.String(50), db.ForeignKey('Rooms.raspberry_id', ondelete="CASCADE"))
     incident_date = db.Column(db.DateTime, default=datetime.datetime.now())
     description = db.Column(db.String(200))
     video_url = db.Column(db.String(200))
     status = db.Column(db.String(20))
+
 
 
 class Ehpad(db.Model):
@@ -33,6 +35,10 @@ class Ehpad(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
 
     def check_password(self, password_hash):
         """Checks the password against the stored hash."""

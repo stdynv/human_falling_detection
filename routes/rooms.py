@@ -97,12 +97,12 @@ def update_room_by_number(room_number):
         return jsonify({"error": f"Failed to update room: {str(e)}"}), 500
 
 
-# Delete room by room number
 @rooms_bp.route("/<string:room_number>", methods=["DELETE"])
 def delete_room_by_number(room_number):
     try:
+        # Ensure case-insensitive match and strip any leading/trailing spaces
         room = Room.query.filter(
-            db.func.lower(Room.room_number) == room_number.lower()
+            db.func.lower(Room.room_number) == db.func.lower(room_number.strip())
         ).first()
         if room is None:
             return jsonify({"error": "Room not found"}), 404
