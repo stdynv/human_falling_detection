@@ -18,7 +18,7 @@ click==8.1.7
 colorama==0.4.6
 cryptography==43.0.0
 dnspython==2.6.1
-encode==0.0.0
+encode>=0.8.0
 eventlet==0.37.0
 Flask==3.0.3
 Flask-Cors==5.0.0
@@ -28,7 +28,7 @@ frozenlist==1.4.1
 gevent==24.2.1
 greenlet==3.1.0
 gunicorn==23.0.0
-h11==0.14.0
+h11>=0.8.0,<0.15.0
 h2==3.2.0
 hpack==3.0.0
 hyperframe==5.2.0
