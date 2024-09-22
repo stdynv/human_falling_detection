@@ -10,15 +10,6 @@ from email.mime.multipart import MIMEMultipart
 import send_mail as mail
 
 from itsdangerous import URLSafeTimedSerializer
-
-
-
-
-
-
-
-
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
