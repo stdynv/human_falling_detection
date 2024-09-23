@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, url_for, current_app
+from flask import Flask, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_cors import CORS
 import socket
 from extensions import db, socketio
@@ -77,18 +77,15 @@ def forgot_password():
     email = request.form.get('email')
 
     if not email:
-        flash('Please enter a valid email address', 'danger')
-        return redirect(url_for('auth-forgot-password-basic'))
+        return jsonify({'error': 'L\'adresse mail renseignée n\'est pas valide '}), 400
 
     user = User.query.filter_by(email=email).first()
     if user:
         token = generate_password_reset_token(user)
         mail.send_password_reset_email(user.email, token)
-        flash('Password reset link has been sent to your email.', 'success')
+        return jsonify({'message': 'Un lien de réinitialisation du mot de passe a été envoyé à votre adresse e-mail'}), 200
     else:
-        flash('No user with that email found.', 'danger')
-
-    return redirect(url_for('login_page'))
+        return jsonify({'error': 'Cet adresse mail n\'est liée à aucun compte.'}), 404
 
 
 @app.route('/chambres')

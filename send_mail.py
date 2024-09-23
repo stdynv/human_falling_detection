@@ -3,7 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def send_password_reset_email(user_email, reset_token):
-    sender = "Protect Care <from@example.com>"
+    sender = "Protect Care <ProtectCare@gmail.com>"
     receiver = user_email
 
     # Create the reset link (you can adjust the URL based on your frontend)
