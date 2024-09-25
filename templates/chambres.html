@@ -93,7 +93,11 @@
                 </div>
                 <div class="mb-3">
                   <label for="type" class="form-label">Type</label>
-                  <input type="text" class="form-control" id="type" required>
+                  <select class="form-select" id="type" required>
+                    <option value="A risque">A risque</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Sans risque">Sans risque</option>
+                  </select>
                 </div>
                 <div class="mb-3">
                   <label for="raspberryId" class="form-label">ID Raspberry</label>
@@ -132,8 +136,12 @@
                             <input type="text" class="form-control" id="editFloor" required>
                         </div>
                         <div class="mb-3">
-                            <label for="editType" class="form-label">Type</label>
-                            <input type="text" class="form-control" id="editType" required>
+                            <label for="edittype" class="form-label">Type</label>
+                            <select class="form-select" id="editType" required>
+                              <option value="A risque">A risque</option>
+                              <option value="Normal">Normal</option>
+                              <option value="Sans risque">Sans risque</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="editRaspberryId" class="form-label">ID Raspberry</label>
@@ -169,10 +177,9 @@
                 </li>
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                    <i the="bx bx-user-circle bx-sm"></i>
+                    <i class="bx bx-user-circle bx-sm"></i> <!-- Corrected here -->
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="/profile">Profil</a></li>
                     <li><a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">Déconnexion</a></li>
                   </ul>
                 </li>
@@ -180,7 +187,7 @@
             </div>
           </div>
         </nav>
-
+        
         <!-- Content -->
         <div class="container-xxl flex-grow-1 container-p-y">
           <div class="d-flex justify-content-between mb-4">
@@ -203,7 +210,7 @@
                     <tr>
                       <th>Chambre</th>
                       <th>État</th>
-                      <th>Dernière Mise à Jour</th>
+                      <th>Risques</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -249,7 +256,7 @@
                     const row = `<tr>
                                 <td><a href="/chambre/${room.room_number }">${room.room_number}</a></td>
                                 <td><span class="badge ${stateBadge}">${stateText}</span></td>
-                                <td>${room.last_updated}</td>
+                                <td>${room.type}</td>
                                 <td>
                                     <button class="btn btn-danger btn-sm" onclick="deleteRoom('${room.room_number}')">Delete</button>
                                     <button class="btn btn-info btn-sm" onclick="updateRoom('${room.room_number}')">Modifier</button>
@@ -360,7 +367,7 @@
               // Populate the form fields with the current room data
               document.getElementById('editRoomNumber').value = data.room_number;
               document.getElementById('editFloor').value = data.floor;
-              document.getElementById('editType').value = data.type;
+              document.getElementById('editType').value = data.type;  // Set the correct type
               document.getElementById('editRaspberryId').value = data.raspberry_id;
               document.getElementById('editOccupied').value = data.occupied ? 'true' : 'false';
 
@@ -379,7 +386,7 @@
 
         const roomNumber = document.getElementById('editRoomNumber').value;
         const floor = document.getElementById('editFloor').value;
-        const type = document.getElementById('editType').value;
+        const type = document.getElementById('editType').value;  // Get selected room type
         const raspberryId = document.getElementById('editRaspberryId').value;
         const occupied = document.getElementById('editOccupied').value;
 
@@ -412,6 +419,19 @@
         .catch(error => {
             console.error('Error:', error);
         });
+    });
+    
+    document.addEventListener("DOMContentLoaded", function () {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = "/";
+      }
+
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        window.location.href = "/";
+      });
     });
 
 

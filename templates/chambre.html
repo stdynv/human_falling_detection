@@ -96,8 +96,8 @@
                       <i class="bx bx-user-circle bx-sm"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                      <li><a class="dropdown-item" href="/profile">Profil</a></li>
-                      <li><a class="dropdown-item" href="javascript:void(0);">Déconnexion</a></li>
+                      <li><a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">Déconnexion</a></li>
+
                     </ul>
                   </li>
                 </ul>
@@ -113,7 +113,6 @@
                   <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                       <h5 class="m-0">Chambre {{ room.room_number }} - Détails</h5>
-                      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editRoomModal">Modifier Chambre</button>
                     </div>
                     <div class="card-body">
                       <h6>Informations Générales</h6>
@@ -183,5 +182,19 @@
     <script src="{{ url_for('static', filename='vendor/js/bootstrap.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/js/menu.js') }}"></script>
+
+    <script>
+          document.addEventListener("DOMContentLoaded", function () {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = "/";
+      }
+
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        window.location.href = "/";
+      })});
+    </script>
   </body>
 </html>

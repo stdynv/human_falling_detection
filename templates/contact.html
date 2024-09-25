@@ -101,7 +101,6 @@
                     <i class="bx bx-user-circle bx-sm"></i>
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="/profile">Profil</a></li>
                     <li><a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">Déconnexion</a></li>
                   </ul>
                 </li>
@@ -117,8 +116,9 @@
           <div class="container-xxl flex-grow-1 container-p-y">
             <div class="card mb-4">
               <h5 class="card-header">Contactez-nous</h5>
+              <div id="successMessage" class="alert alert-success" style="display: none;"></div>
               <div class="card-body">
-                <form action="{{ url_for('contact_submit') }}" method="post">
+                <form action="{{ url_for('contact_submit') }}" method="post" id = "contactForm">
                   <div class="mb-3">
                     <label for="name" class="form-label">Nom</label>
                     <input type="text" class="form-control" id="name" name="name" placeholder="Votre Nom" required>
@@ -185,5 +185,49 @@
 
   <!-- Main JS -->
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = "/";
+      }
+
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        window.location.href = "/";
+      });
+
+
+
+      document.getElementById('contactForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(this);
+
+        fetch('/contact-submit', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            // Show the success message
+            const successMessage = document.getElementById('successMessage');
+            successMessage.style.display = 'block';
+            successMessage.textContent = data.message;
+
+            // Optionally, clear the form fields
+            document.getElementById('contactForm').reset();
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    
+      });
+    })
+  </script>
+
 </body>
 </html>
