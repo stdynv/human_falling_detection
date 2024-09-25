@@ -21,10 +21,16 @@ class Incident(db.Model):
 
     incident_id = db.Column(db.Integer, primary_key=True)
     raspberry_id = db.Column(db.String(50), db.ForeignKey('Rooms.raspberry_id', ondelete="CASCADE"))
-    incident_date = db.Column(db.DateTime, default=datetime.datetime.now())
+    incident_date = db.Column(db.DateTime, default=datetime.datetime.now())  # Start datetime
+    incident_date_fin = db.Column(db.DateTime)  # End datetime
+    
+    # Optional time column, if needed
+    intervention_time = db.Column(db.Time)  # Separate time column
+
     description = db.Column(db.String(200))
     video_url = db.Column(db.String(200))
     status = db.Column(db.String(20))
+
 
 
 
