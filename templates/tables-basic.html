@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data--path="{{ url_for('static', filename='') }}" data-template="vertical-menu-template-free" data-style="light">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
@@ -59,7 +60,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
 </head>
 
 <body>
@@ -196,7 +196,7 @@
                   <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="m-0">Alertes Actives</h5>
                   </div>
-                  <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                  <div class="card-body" id="activeAlertsList" style="max-height: 300px; overflow-y: auto;">
                     <div class="alert alert-light text-center">Pas d'alerte</div>
                   </div>
                 </div>
@@ -277,6 +277,9 @@
     </div>
   </div>
 
+  <!-- Ajouter un élément audio pour le son d'alerte -->
+  <audio id="alertSound" src="{{ url_for('static', filename='/audio/alerte.mp3') }}" preload="auto"></audio>
+
   <!-- JavaScript to Handle Alert Modal with Timer and WebSocket Integration -->
   <script type="text/javascript">
     var socket = io('{{server_url}}', {
@@ -295,12 +298,20 @@
     socket.on('notification', function(data) {
         console.log('New incident received:', data);
 
-        // Extract room number, video URL, and display the popup with the correct values
         const room = data.message.split("Room ")[1] || "Unknown";  // Extract room number
         const videoUrl = data.video_url;  // Extract video URL
 
+        // Play the alert sound when a notification is received
+        var alertSound = document.getElementById('alertSound');
+        alertSound.play().catch(function() {
+          console.log('Lecture audio bloquée jusqu\'à une interaction utilisateur');
+        });
+
         // Display the alert popup with the room number and video player
         showAlertPopup(room, videoUrl);
+
+        // Add to active alerts section
+        addActiveAlert(data.incident_id, room, videoUrl);
     });
 
     // Listen for disconnection
@@ -338,6 +349,82 @@
       clearInterval(timerInterval);
       var alertModal = bootstrap.Modal.getInstance(document.getElementById('alertModal'));
       alertModal.hide();
+
+      // Stopper le son
+      var alertSound = document.getElementById('alertSound');
+      alertSound.pause();
+      alertSound.currentTime = 0; // Réinitialiser à 0 pour rejouer le son lors de la prochaine alerte
+    }
+
+    // Add to active alerts
+    function addActiveAlert(incidentId, room, videoUrl) {
+        const activeAlertsList = document.getElementById('activeAlertsList');
+        activeAlertsList.innerHTML = '';  // Remove "Pas d'alerte" message if present
+
+        const alertItem = document.createElement('div');
+        alertItem.className = 'alert alert-warning d-flex justify-content-between align-items-center';
+        alertItem.innerHTML = `
+            <div>
+                <strong>Chambre ${room}</strong> - Chute en cours
+                <a href="${videoUrl}" target="_blank" class="d-block">Voir la vidéo</a>
+            </div>
+            <button class="btn btn-primary" onclick="finishIncident(${incidentId}, this)">Terminer</button>
+        `;
+        activeAlertsList.appendChild(alertItem);
+    }
+
+    // Function to finish an active incident
+    function finishIncident(incidentId, buttonElement) {
+        fetch(`/api/incidents/finish-incident/${incidentId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message && data.incident_date_fin) {
+                    // Supprimer l'alerte de la liste si la date de fin est présente
+                    buttonElement.closest('.alert').remove();
+
+                    // Si plus d'alertes actives, afficher le message "Pas d'alerte"
+                    const activeAlertsList = document.getElementById('activeAlertsList');
+                    if (activeAlertsList.children.length === 0) {
+                        activeAlertsList.innerHTML = '<div class="alert alert-light text-center">Pas d\'alerte</div>';
+                    }
+                }
+
+                console.log(data.message);
+            })
+            .catch(error => console.error('Error finishing incident:', error));
+    }
+
+    // Charger les alertes actives au chargement de la page
+    document.addEventListener("DOMContentLoaded", function () {
+        loadActiveAlerts();
+    });
+
+    // Afficher une alerte de chute en cours
+    function loadActiveAlerts() {
+        fetch('/api/incidents/active-incidents')
+            .then(response => response.json())
+            .then(data => {
+                const activeAlertsList = document.getElementById('activeAlertsList');
+                activeAlertsList.innerHTML = '';  // Vider la liste actuelle
+
+                if (data.active_incidents.length === 0) {
+                    activeAlertsList.innerHTML = '<div class="alert alert-light text-center">Pas d\'alerte</div>';
+                } else {
+                    data.active_incidents.forEach(incident => {
+                        const alertItem = document.createElement('div');
+                        alertItem.className = 'alert alert-warning d-flex justify-content-between align-items-center';
+                        alertItem.innerHTML = `
+                            <div>
+                                <strong>Chambre ${incident.room_number}</strong> - Chute en cours
+                                <a href="${incident.video_url}" target="_blank" class="d-block">Voir la vidéo</a>
+                            </div>
+                            <button class="btn btn-primary" onclick="finishIncident(${incident.incident_id}, this)">Terminer</button>
+                        `;
+                        activeAlertsList.appendChild(alertItem);
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching active incidents:', error));
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -358,8 +445,6 @@
         .then(data => {
           if (data.incidents_count !== undefined) {
             const todayFallsElement = document.querySelector('.chutes-aujourd-hui h2');
-
-            // Mettre à jour le texte pour afficher le nombre de chutes d'aujourd'hui
             todayFallsElement.textContent = data.incidents_count;
           }
         })
@@ -466,4 +551,5 @@
   <script src="{{ url_for('static', filename='/js/dashboards-analytics.js') }}"></script>
 
 </body>
+
 </html>
