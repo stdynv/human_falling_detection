@@ -1,10 +1,8 @@
 <!doctype html>
-
 <html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', filename='') }}" data-template="vertical-menu-template-free" data-style="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-
     <title>Chambre {{ room.room_number }} - Gestion | Détection de Chute</title>
     <meta name="description" content="Détails d'une chambre pour la gestion de chutes dans un EHPAD." />
 
@@ -30,17 +28,19 @@
     <!-- Helpers -->
     <script src="{{ url_for('static', filename='vendor/js/helpers.js') }}"></script>
     <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+
+    <!-- jQuery pour charger les incidents -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   </head>
 
   <body>
-    <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
         <!-- Menu -->
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-          <div class="app-brand demo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; height: auto; box-sizing: border-box;">
-            <a href="/" class="app-brand-link" style="display: flex; align-items: center; justify-content: center; width: 100%; max-width: 200px;">
-              <img src="{{ url_for('static', filename='/img/logo.png') }}" alt="Protect Care Logo" class="app-brand-logo demo" style="max-width: 90%;" />
+          <div class="app-brand demo">
+            <a href="/" class="app-brand-link">
+              <img src="{{ url_for('static', filename='/img/logo.png') }}" alt="Protect Care Logo" class="app-brand-logo demo" />
             </a>
           </div>
           <div class="menu-inner-shadow"></div>
@@ -77,19 +77,6 @@
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                       <i class="bx bx-bell bx-sm"></i>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                      <li>
-                        <a class="dropdown-item" href="javascript:void(0);">
-                          <div class="d-flex align-items-center">
-                            <i class="bx bx-error-alt bx-sm me-2"></i>
-                            <div>
-                              <span>Nouvelle alerte de chute</span>
-                              <small class="text-muted">Chambre {{ room.room_number }} - Il y a 5 minutes</small>
-                            </div>
-                          </div>
-                        </a>
-                      </li>
-                    </ul>
                   </li>
                   <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -104,6 +91,7 @@
               </div>
             </div>
           </nav>
+
           <!-- Content wrapper -->
           <div class="content-wrapper">
             <!-- Content -->
@@ -123,10 +111,11 @@
                       <p><strong>Statut :</strong> {{ 'Occupée' if room.occupied else 'Disponible' }}</p>
                       <p><strong>ID Raspberry :</strong> {{ room.raspberry_id }}</p>
                       <h6>Nombre de Chutes</h6>
-                      <p>{{ incident_count }} chutes détectées ce mois-ci.</p>
+                      <p id="incident_count">Aucune chute détectée ce mois-ci.</p>
                     </div>
                   </div>
                 </div>
+
                 <div class="col-lg-12 mb-4">
                   <div class="card">
                     <h5 class="card-header">Historique des Chutes</h5>
@@ -139,14 +128,10 @@
                             <th>Action</th>
                           </tr>
                         </thead>
-                        <tbody>
-                          {% for incident in incidents %}
-                            <tr>
-                              <td>{{ incident.date_time }}</td>
-                              <td><span class="badge bg-danger">Chute détectée</span></td>
-                              <td><button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#videoModal{{ incident.id }}">Regarder</button></td>
-                            </tr>
-                          {% endfor %}
+                        <tbody id="incidents_table_body">
+                          <tr>
+                            <td colspan="3">Chargement des incidents...</td>
+                          </tr>
                         </tbody>
                       </table>
                     </div>
@@ -160,22 +145,9 @@
         <!-- Layout page -->
       </div>
     </div>
+
     <!-- Video Modal Template -->
-    {% for incident in incidents %}
-      <div class="modal fade" id="videoModal{{ incident.id }}" tabindex="-1" aria-labelledby="videoModalLabel{{ incident.id }}" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="videoModalLabel{{ incident.id }}">Vidéo {{ incident.id }}</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <p>Video Player Placeholder for Vidéo {{ incident.id }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
+    <div id="videoModals"></div>
 
     <!-- Core JS -->
     <script src="{{ url_for('static', filename='vendor/libs/jquery/jquery.js') }}"></script>
@@ -183,5 +155,61 @@
     <script src="{{ url_for('static', filename='vendor/js/bootstrap.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/js/menu.js') }}"></script>
+
+    <script>
+      $(document).ready(function() {
+        const roomNumber = "{{ room.room_number }}";
+        const incidentsUrl = `/api/incidents/room/${roomNumber}/incidents`;
+
+        // Fetch the incidents for the room
+        $.get(incidentsUrl, function(data) {
+          const incidents = data.incidents;
+          let incidentsHtml = '';
+          let incidentCount = 0;
+
+          if (incidents && incidents.length > 0) {
+            incidents.forEach(incident => {
+              incidentCount += 1;
+              incidentsHtml += `
+                <tr>
+                  <td>${incident.incident_date}</td>
+                  <td><span class="badge bg-danger">${incident.status}</span></td>
+                  <td><button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#videoModal${incident.incident_id}">Regarder</button></td>
+                </tr>
+              `;
+
+              // Generate modal for each video
+              const videoModalHtml = `
+                <div class="modal fade" id="videoModal${incident.incident_id}" tabindex="-1" aria-labelledby="videoModalLabel${incident.incident_id}" aria-hidden="true">
+                  <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="videoModalLabel${incident.incident_id}">Vidéo Incident ${incident.incident_id}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <video controls>
+                          <source src="${incident.video_url}" type="video/mp4">
+                          Votre navigateur ne supporte pas la lecture vidéo.
+                        </video>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+              $("#videoModals").append(videoModalHtml);
+            });
+
+            $('#incident_count').text(`${incidentCount} chutes détectées ce mois-ci.`);
+          } else {
+            incidentsHtml = '<tr><td colspan="3">Aucune chute enregistrée pour cette chambre.</td></tr>';
+          }
+
+          $('#incidents_table_body').html(incidentsHtml);
+        }).fail(function() {
+          $('#incidents_table_body').html('<tr><td colspan="3">Erreur lors du chargement des incidents.</td></tr>');
+        });
+      });
+    </script>
   </body>
 </html>

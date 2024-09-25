@@ -44,7 +44,7 @@ def create_incident():
             "notification",
             {
                 "message": message,
-                "incident_id": new_incident.incident_id,  # Ajouter l'ID de l'incident
+                "incident_id": new_incident.incident_id,
                 "incident_date": str(incident_date),
                 "video_url": new_incident.video_url,
             },
@@ -58,69 +58,34 @@ def create_incident():
         logging.error(f"Error while creating an incident: {e}")
         return jsonify({"error": f"An error occurred while creating the incident: {str(e)}"}), 500
 
-# Endpoint pour obtenir les alertes actives (les incidents sans incident_date_fin)
-@incidents_bp.route("/active-incidents", methods=["GET"])
-def get_active_incidents():
-    try:
-        # Récupérer uniquement les incidents qui n'ont pas encore de date de fin (incident_date_fin est NULL)
-        active_incidents = Incident.query.filter(Incident.incident_date_fin.is_(None)).all()
 
-        active_incidents_list = [
+# Endpoint pour obtenir les incidents d'une chambre spécifique
+@incidents_bp.route("/room/<int:room_number>/incidents", methods=["GET"])
+def get_room_incidents(room_number):
+    try:
+        room = Room.query.filter_by(room_number=room_number).first()
+        if not room:
+            return jsonify({"error": "Room not found"}), 404
+
+        incidents = Incident.query.filter_by(raspberry_id=room.raspberry_id).order_by(Incident.incident_date.desc()).all()
+
+        incidents_list = [
             {
                 "incident_id": incident.incident_id,
-                "room_number": room.room_number,
                 "incident_date": incident.incident_date.strftime("%Y-%m-%d %H:%M:%S"),
-                "video_url": incident.video_url
+                "description": incident.description,
+                "video_url": incident.video_url,
+                "status": incident.status,
             }
-            for incident in active_incidents
-            for room in Room.query.filter_by(raspberry_id=incident.raspberry_id)
+            for incident in incidents
         ]
 
-        return jsonify({"active_incidents": active_incidents_list}), 200
+        return jsonify({"incidents": incidents_list}), 200
 
     except Exception as e:
-        return jsonify({"error": f"An error occurred while fetching active incidents: {str(e)}"}), 500
+        logging.error(f"Error fetching incidents for room {room_number}: {str(e)}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
-# Endpoint pour terminer un incident
-@incidents_bp.route("/finish-incident/<int:incident_id>", methods=["POST"])
-def finish_incident(incident_id):
-    try:
-        logging.info(f"Trying to finish incident {incident_id}")
-        
-        incident = Incident.query.get(incident_id)
-        
-        if not incident:
-            logging.error(f"Incident {incident_id} not found")
-            return jsonify({"error": "Incident not found"}), 404
-
-        # Convertir incident.incident_date en un datetime avec fuseau horaire
-        if incident.incident_date.tzinfo is None:
-            incident.incident_date = tz.localize(incident.incident_date)
-
-        # Enregistrer la date de fin et calculer le temps d'intervention
-        incident.incident_date_fin = datetime.now(tz)
-        incident_time = incident.incident_date_fin - incident.incident_date
-        
-        # Convertir timedelta en minutes
-        intervention_time_in_minutes = incident_time.total_seconds() / 60  # Convertir secondes en minutes
-        
-        # Enregistrer la durée d'intervention sous forme de nombre (minutes)
-        incident.intervention_time = intervention_time_in_minutes
-        
-        logging.info(f"Finished incident {incident_id}, intervention time: {intervention_time_in_minutes} minutes")
-        
-        db.session.commit()
-
-        # Renvoyer la date de fin dans la réponse pour le frontend
-        return jsonify({
-            "message": "Incident finished successfully",
-            "incident_date_fin": str(incident.incident_date_fin)  # Retourner la date de fin au frontend
-        }), 200
-
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"Error while finishing the incident: {e}")
-        return jsonify({"error": f"An error occurred while finishing the incident: {str(e)}"}), 500
 
 # Endpoint pour obtenir les dernières 10 chutes
 @incidents_bp.route("/latest-incidents", methods=["GET"])
@@ -144,6 +109,7 @@ def get_latest_incidents():
     except Exception as e:
         return jsonify({"error": f"An error occurred while fetching incidents: {str(e)}"}), 500
 
+
 # Endpoint pour obtenir les chutes d'aujourd'hui
 @incidents_bp.route("/today-incidents", methods=["GET"])
 def get_today_incidents():
@@ -157,6 +123,7 @@ def get_today_incidents():
         return jsonify({"incidents_count": incidents_count}), 200
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
 
 # Endpoint pour obtenir le nombre de chutes par mois
 @incidents_bp.route("/incidents-per-month", methods=["GET"])
@@ -189,3 +156,44 @@ def get_incidents_per_month():
     except Exception as e:
         logging.error(f"Error fetching incidents per month: {str(e)}")
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
+# Endpoint pour terminer un incident
+@incidents_bp.route("/finish-incident/<int:incident_id>", methods=["POST"])
+def finish_incident(incident_id):
+    try:
+        logging.info(f"Trying to finish incident {incident_id}")
+        
+        incident = Incident.query.get(incident_id)
+        
+        if not incident:
+            logging.error(f"Incident {incident_id} not found")
+            return jsonify({"error": "Incident not found"}), 404
+
+        # Convertir incident.incident_date en un datetime avec fuseau horaire
+        if incident.incident_date.tzinfo is None:
+            incident.incident_date = tz.localize(incident.incident_date)
+
+        # Enregistrer la date de fin et calculer le temps d'intervention
+        incident.incident_date_fin = datetime.now(tz)
+        incident_time = incident.incident_date_fin - incident.incident_date
+        
+        # Convertir timedelta en minutes
+        intervention_time_in_minutes = incident_time.total_seconds() / 60  # Convertir secondes en minutes
+        
+        # Enregistrer la durée d'intervention sous forme de nombre (minutes)
+        incident.intervention_time = intervention_time_in_minutes
+        
+        logging.info(f"Finished incident {incident_id}, intervention time: {intervention_time_in_minutes} minutes")
+        
+        db.session.commit()
+
+        return jsonify({
+            "message": "Incident finished successfully",
+            "incident_date_fin": str(incident.incident_date_fin)
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error while finishing the incident: {e}")
+        return jsonify({"error": f"An error occurred while finishing the incident: {str(e)}"}), 500
