@@ -35,6 +35,30 @@
   <!-- Helpers -->
   <script src="{{ url_for('static', filename='vendor/js/helpers.js') }}"></script>
   <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+
+  <style>
+    #alertModal .modal-body {
+      text-align: center;
+    }
+    #alertRoom {
+      font-size: 2.5rem;
+      color: red;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    #alertTimer {
+      font-size: 2rem;
+      color: black;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    #alertVideoPlayer {
+      width: 100%;
+      height: auto;
+      margin-top: 20px;
+    }
+  </style>
+  
 </head>
 
 <body>
@@ -72,6 +96,33 @@
           </li>
         </ul>
       </aside>
+
+      <!-- Modal for Alerts -->
+      <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="alertModalLabel">Nouvelle Alerte de Chute</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p id="alertRoom"></p>
+              <p id="alertTimer">00:00</p>
+              <!-- Video Player -->
+              <video id="alertVideoPlayer" controls>
+                <source id="alertVideoSource" src="" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id="markAsSeenButton" onclick="markAsSeen()">Vue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ajouter un élément audio pour le son d'alerte -->
+      <audio id="alertSound" src="{{ url_for('static', filename='/audio/alerte.mp3') }}" preload="auto"></audio>
 
       <!-- Create Room Modal -->
       <div class="modal fade" id="createRoomModal" tabindex="-1" aria-labelledby="createRoomModalLabel" aria-hidden="true">
@@ -438,6 +489,82 @@
 
 
   </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+<script>
+  var socket = io('{{server_url}}', {
+    transports: ['websocket'],  // Forces WebSocket only
+    reconnection: true,
+    reconnectionAttempts: 5,    // Adjust this to suit your needs
+    reconnectionDelay: 2000     // Delay reconnection attempts to avoid flooding
+  });
+
+  // Listen for connection
+  socket.on('connect', function() {
+      console.log('Connected to SocketIO server');
+  });
+
+  // Listen for the 'notification' event
+  socket.on('notification', function(data) {
+      console.log('New incident received:', data);
+
+      const room = data.message.split("Room ")[1] || "Unknown";  // Extract room number
+      const videoUrl = data.video_url;  // Extract video URL
+
+      // Play the alert sound when a notification is received
+      var alertSound = document.getElementById('alertSound');
+      alertSound.play().catch(function() {
+        console.log('Lecture audio bloquée jusqu\'à une interaction utilisateur');
+      });
+
+      // Display the alert popup with the room number and video player
+      showAlertPopup(room, videoUrl);
+  });
+
+  // Listen for disconnection
+  socket.on('disconnect', function() {
+      console.log('Disconnected from SocketIO server');
+  });
+
+  var timerInterval;
+
+  // Function to show the alert popup
+  function showAlertPopup(room, videoUrl) {
+    document.getElementById('alertRoom').textContent = "Chambre " + room;
+    document.getElementById('alertVideoSource').src = videoUrl;
+    document.getElementById('alertVideoPlayer').load();  // Reload the video player with the new source
+    startTimer();
+
+    var alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+    alertModal.show();
+  }
+
+  // Function to start the timer
+  function startTimer() {
+    var timerDisplay = document.getElementById('alertTimer');
+    var seconds = 0;
+    timerInterval = setInterval(function() {
+      seconds++;
+      var minutes = Math.floor(seconds / 60);
+      var remainingSeconds = seconds % 60;
+      timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+
+  // Function to mark the alert as seen and stop the timer
+  function markAsSeen() {
+    clearInterval(timerInterval);
+    var alertModal = bootstrap.Modal.getInstance(document.getElementById('alertModal'));
+    alertModal.hide();
+
+    // Stop the alert sound
+    var alertSound = document.getElementById('alertSound');
+    alertSound.pause();
+    alertSound.currentTime = 0; // Reset the audio for the next alert
+  }
+</script>
+
 </body>
 
 </html>
