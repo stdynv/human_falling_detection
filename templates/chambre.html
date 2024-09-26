@@ -63,11 +63,14 @@
       <div class="layout-container">
         <!-- Menu -->
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-          <div class="app-brand demo">
-            <a href="/" class="app-brand-link">
-              <img src="{{ url_for('static', filename='/img/logo.png') }}" alt="Protect Care Logo" class="app-brand-logo demo" />
-            </a>
-          </div>
+          <div class="app-brand demo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; height: auto; box-sizing: border-box;">
+          <a href="/" class="app-brand-link" style="display: flex; align-items: center; justify-content: center; width: 100%; max-width: 200px;">
+            <img src="{{ url_for('static', filename='/img/logo.png') }}" alt="Protect Care Logo" class="app-brand-logo demo" style="max-width: 90%;" />
+          </a>
+          <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large d-block d-xl-none">
+            <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
+          </a>
+        </div>
           <div class="menu-inner-shadow"></div>
           <ul class="menu-inner py-1">
             <li class="menu-item">
