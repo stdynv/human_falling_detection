@@ -2,7 +2,7 @@
 <html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', filename='') }}" data-template="vertical-menu-template-free" data-style="light">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum=1.0" />
     <title>Chambre {{ room.room_number }} - Gestion | Détection de Chute</title>
     <meta name="description" content="Détails d'une chambre pour la gestion de chutes dans un EHPAD." />
 
@@ -109,7 +109,6 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                       <li><a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">Déconnexion</a></li>
-
                     </ul>
                   </li>
                 </ul>
@@ -208,7 +207,6 @@
     <script src="{{ url_for('static', filename='vendor/js/menu.js') }}"></script>
 
     <script>
-
       $(document).ready(function() {
         const roomNumber = "{{ room.room_number }}";
         const incidentsUrl = `/api/incidents/room/${roomNumber}/incidents`;
@@ -222,10 +220,15 @@
           if (incidents && incidents.length > 0) {
             incidents.forEach(incident => {
               incidentCount += 1;
+
+              // Check if incident_date_fin is defined to determine status
+              const statusText = incident.incident_date_fin ? 'Terminé' : 'En cours';
+              const statusClass = incident.incident_date_fin ? 'bg-success' : 'bg-danger';
+
               incidentsHtml += `
                 <tr>
                   <td>${incident.incident_date}</td>
-                  <td><span class="badge bg-danger">${incident.status}</span></td>
+                  <td><span class="badge ${statusClass}">${statusText}</span></td>
                   <td><button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#videoModal${incident.incident_id}">Regarder</button></td>
                 </tr>
               `;
@@ -330,7 +333,6 @@
         alertSound.currentTime = 0;
       }
     </script>
-
 
     <script>
           document.addEventListener("DOMContentLoaded", function () {

@@ -72,6 +72,7 @@ def get_room_incidents(room_number):
             {
                 "incident_id": incident.incident_id,
                 "incident_date": incident.incident_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "incident_date_fin": incident.incident_date_fin.strftime("%Y-%m-%d %H:%M:%S") if incident.incident_date_fin else None,  # Ajout de la date de fin
                 "description": incident.description,
                 "video_url": incident.video_url,
                 "status": incident.status,
@@ -96,6 +97,7 @@ def get_latest_incidents():
             {
                 "room_number": room.room_number,
                 "incident_date": incident.incident_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "incident_date_fin": incident.incident_date_fin.strftime("%Y-%m-%d %H:%M:%S") if incident.incident_date_fin else None,  # Ajout de la date de fin
                 "description": incident.description,
                 "video_url": incident.video_url,
                 "status": incident.status,
