@@ -115,7 +115,7 @@ def get_latest_incidents():
 @incidents_bp.route("/today-incidents", methods=["GET"])
 def get_today_incidents():
     try:
-        today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_start = datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0)
         today_end = today_start + timedelta(days=1)
 
         incidents_today = Incident.query.filter(Incident.incident_date >= today_start, Incident.incident_date < today_end).all()
