@@ -41,7 +41,9 @@ The architecture consists of the following main components:
 3. **Flask API**: Manages communication between the Raspberry Pi and storage, as well as provides an interface for real-time alerts and incident data.
 4. **Web Application**: Dashboard for EHPAD staff to view incident details, videos, and receive real-time alerts.
 
-![System Architecture](link-to-your-diagram)
+
+
+![System Architecture](https://github.com/user-attachments/assets/ccb72c29-16a7-4b9d-a1db-b9c2352ba552)
 
 ## Setup and Installation
 
@@ -49,13 +51,16 @@ To set up the project, follow these steps:
 
 ### Prerequisites
 
-- **Python 3.9+**
+- **Python 3.8+**
 - **Raspberry Pi** with a camera module
 - **Azure Account**: For Blob Storage setup
 - **Virtual Environment**: Recommended to isolate dependencies
 
 ### Clone the Repository
 
-```bash
+```
 git clone https://github.com/stdynv/human_falling_detection.git
 cd human_falling_detection
+```
+
+### test
