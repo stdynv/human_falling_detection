@@ -6,7 +6,7 @@ def send_password_reset_email(user_email, reset_token):
     sender = "Protect Care <ProtectCare@gmail.com>"
     receiver = user_email
 
-    reset_link = f"http://localhost:8000/reset-password?token={reset_token}"
+    reset_link = f"https://flask-ehpad-fde5f2fndkd0f2gk.eastus-01.azurewebsites.net/reset-password?token={reset_token}"
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Password Reset Request"
