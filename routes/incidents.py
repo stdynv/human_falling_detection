@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
 import logging
-from flask_socketio import emit
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from models import Incident, Room
@@ -178,13 +177,11 @@ def finish_incident(incident_id):
         incident.incident_date_fin = datetime.now(tz)
         incident_time = incident.incident_date_fin - incident.incident_date
         
-        # Convertir timedelta en minutes
-        intervention_time_in_minutes = incident_time.total_seconds() / 60  # Convertir secondes en minutes
+        # Calculer la différence en secondes et stocker dans intervention_time
+        intervention_time_in_seconds = int(incident_time.total_seconds())
+        incident.intervention_time = intervention_time_in_seconds
         
-        # Enregistrer la durée d'intervention sous forme de nombre (minutes)
-        incident.intervention_time = intervention_time_in_minutes
-        
-        logging.info(f"Finished incident {incident_id}, intervention time: {intervention_time_in_minutes} minutes")
+        logging.info(f"Finished incident {incident_id}, intervention time: {intervention_time_in_seconds} seconds")
         
         db.session.commit()
 
@@ -197,3 +194,80 @@ def finish_incident(incident_id):
         db.session.rollback()
         logging.error(f"Error while finishing the incident: {e}")
         return jsonify({"error": f"An error occurred while finishing the incident: {str(e)}"}), 500
+
+
+# Endpoint pour obtenir les incidents actifs sans intervention_time
+@incidents_bp.route("/active-incidents", methods=["GET"])
+def get_active_incidents():
+    try:
+        incidents = db.session.query(Incident, Room).join(Room, Room.raspberry_id == Incident.raspberry_id).filter(Incident.intervention_time.is_(None)).all()
+
+        active_incidents = [
+            {
+                "incident_id": incident.incident_id,
+                "room_number": room.room_number,
+                "incident_date": incident.incident_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "video_url": incident.video_url,
+            }
+            for incident, room in incidents
+        ]
+
+        return jsonify({"active_incidents": active_incidents}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred while fetching active incidents: {str(e)}"}), 500
+
+
+# Nouvelle route pour calculer et mettre à jour intervention_time pour tous les incidents
+@incidents_bp.route("/update-intervention-times", methods=["POST"])
+def update_intervention_times():
+    try:
+        # Récupérer tous les incidents où intervention_time est NULL et où les deux dates sont présentes
+        incidents = Incident.query.filter(
+            Incident.intervention_time.is_(None),
+            Incident.incident_date.isnot(None),
+            Incident.incident_date_fin.isnot(None)
+        ).all()
+
+        # Pour chaque incident, calculer la différence en secondes entre incident_date et incident_date_fin
+        updated_incidents = 0
+        for incident in incidents:
+            incident_time = incident.incident_date_fin - incident.incident_date
+            intervention_time_in_seconds = int(incident_time.total_seconds())
+
+            # Mettre à jour intervention_time
+            incident.intervention_time = intervention_time_in_seconds
+            updated_incidents += 1
+            logging.info(f"Updated incident {incident.incident_id} with {intervention_time_in_seconds} seconds")
+
+        # Commit les changements dans la base de données
+        db.session.commit()
+
+        # Retourner un message avec le nombre d'incidents mis à jour
+        return jsonify({"message": f"{updated_incidents} incidents updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error updating intervention times: {str(e)}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
+# Nouvelle route pour obtenir la moyenne des temps d'intervention des 10 dernières interventions
+@incidents_bp.route("/average-last-10-interventions", methods=["GET"])
+def average_last_10_interventions():
+    try:
+        # Récupérer les 10 dernières interventions avec intervention_time non nul
+        last_10_interventions = Incident.query.filter(Incident.intervention_time.isnot(None)).order_by(Incident.incident_date_fin.desc()).limit(10).all()
+
+        # Calculer la moyenne des temps d'intervention
+        if not last_10_interventions:
+            return jsonify({"average_intervention_time": 0}), 200
+
+        total_time = sum(incident.intervention_time for incident in last_10_interventions)
+        average_time = total_time / len(last_10_interventions)
+
+        return jsonify({"average_intervention_time": average_time}), 200
+
+    except Exception as e:
+        logging.error(f"Error calculating average intervention time: {str(e)}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
