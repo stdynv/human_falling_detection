@@ -122,7 +122,7 @@ def contact_submit():
 
     # Sender and Receiver
     sender = f"Protect Care <{email}>"
-    receiver = "nabilhatri8@gmail.com"
+    receiver = "ProtectCare@gmail.com"
 
     # Create a multipart email (to handle both plain text and HTML)
     msg = MIMEMultipart("alternative")
@@ -173,7 +173,8 @@ def contact_submit():
         server.login("5ca23688855e9a", "8286793f7b04b1")
         server.sendmail(sender, receiver, msg.as_string())
 
-    return "Email sent successfully!"
+    return jsonify({'message': 'Votre requête a bien été prise en compte', 'status': 'success'})    
+
 
 @app.route('/reset-password', methods=['GET', 'POST'])
 def reset_password():
