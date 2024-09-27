@@ -9,8 +9,6 @@ This project aims to detect falls of elderly people in nursing homes (EHPADs) us
 - [Architecture](#architecture)
 - [Setup and Installation](#setup-and-installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
@@ -42,6 +40,7 @@ The architecture consists of the following main components:
 4. **Web Application**: Dashboard for EHPAD staff to view incident details, videos, and receive real-time alerts.
 
 ![System Architecture](https://github.com/user-attachments/assets/ccb72c29-16a7-4b9d-a1db-b9c2352ba552)
+
 
 ## Setup and Installation
 
