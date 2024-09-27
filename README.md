@@ -86,5 +86,35 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
+## Usage
+
+### login Page 
+![image](https://github.com/user-attachments/assets/a90ef40d-6690-485d-97f7-d2739cece5e2)
+
+```
+username : Ehpad number # for testing use Ehpad 94 or Ehpad 92 
+password : password # if you forgot password click on the link password forgot
+```
+### Dashboard
+![image](https://github.com/user-attachments/assets/541c0cb3-8e3f-47af-b0c5-78687d3b3f31)
+- Real Time Fall video
+- Falling Count per Month
+- Fall video history
+- Fall Today count
+- Average intervention time 
+
+### CRUD Rooms 
+![image](https://github.com/user-attachments/assets/ffbde0e0-f2d4-441a-b038-74af114229b2)
+
+- Create new room
+- Update new room
+- Delete exisiting room
+- Get Room(s)
+
+### Contact Page 
+![image](https://github.com/user-attachments/assets/44eb1093-a46f-47f1-bc2c-645e50746f9b)
+
+
+
 
 
