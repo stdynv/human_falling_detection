@@ -50,7 +50,7 @@ To set up the project, follow these steps:
 
 - **Python 3.8+**
 - **Raspberry Pi** with a camera module
-- **Azure Account**: For Blob Storage setup
+- **Azure Account**: For Blob Storage setup and APp deployement
 - **Virtual Environment**: Recommended to isolate dependencies
 
 ### Clone the Repository
