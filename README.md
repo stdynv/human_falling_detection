@@ -41,8 +41,6 @@ The architecture consists of the following main components:
 3. **Flask API**: Manages communication between the Raspberry Pi and storage, as well as provides an interface for real-time alerts and incident data.
 4. **Web Application**: Dashboard for EHPAD staff to view incident details, videos, and receive real-time alerts.
 
-
-
 ![System Architecture](https://github.com/user-attachments/assets/ccb72c29-16a7-4b9d-a1db-b9c2352ba552)
 
 ## Setup and Installation
@@ -63,4 +61,30 @@ git clone https://github.com/stdynv/human_falling_detection.git
 cd human_falling_detection
 ```
 
-### test
+### Configure Environment Variables
+Create a ```.env``` file to store your Azure Blob Storage connection string and other sensitive information:
+
+```
+DB_SERVER=db server name
+DB_DATABASE=database name 
+DB_USERNAME=your db username
+DB_PASSWORD=your db password
+API_URL = APP LINK
+AZURE_BLOB_STORAGE= azure_blob_storage
+NAME_CONTAINER= container name
+```
+
+### Install Dependencies
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+pip install -r requirements.txt
+```
+
+### Run Application 
+
+```bash
+python app.py
+```
+
+
