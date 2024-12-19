@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocketIO Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+</head>
+<body>
+    <h1>SocketIO Test</h1>
+    <p id="status">Not connected...</p>
+    <p id="message"></p>
+
+    <script type="text/javascript">
+        // Replace 'wss://' with 'ws://' if not using SSL
+        var socket = io('{{server_url}}', {
+            transports: ['websocket'],  // Forces WebSocket only
+            reconnection: true,
+            reconnectionAttempts: 5,    // Adjust this to suit your needs
+            reconnectionDelay: 2000     // Delay reconnection attempts to avoid flooding
+        });
+    
+        // Listen for connection
+        socket.on('connect', function() {
+            document.getElementById('status').innerText = 'Connected to SocketIO server!';
+            console.log('Connected to SocketIO server');
+        });
+
+        // Listen for the 'notification' event (or correct event name)
+        socket.on('notification', function(data) {
+            console.log('New incident received:', data);
+            document.getElementById('message').innerText = 'New incident: ' + JSON.stringify(data);
+        });
+
+        // Listen for disconnection
+        socket.on('disconnect', function() {
+            document.getElementById('status').innerText = 'Disconnected from SocketIO server';
+            console.log('Disconnected from SocketIO server');
+        });
+    </script>
+</body>
+</html>

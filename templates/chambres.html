@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', filename='') }}" data-template="vertical-menu-template-free" data-style="light">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+  <title>Chambres - Gestion | Détection de Chute</title>
+  <meta name="description" content="Gestion des chambres pour la détection de chutes." />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}" />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  
+
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fonts/boxicons.css') }}" />
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/css/core.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/css/theme-default.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
+
+  <!-- Vendors CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/libs/apex-charts/apex-charts.css') }}" />
+
+  <!-- Helpers -->
+  <script src="{{ url_for('static', filename='vendor/js/helpers.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+
+  <style>
+    #alertModal .modal-body {
+      text-align: center;
+    }
+    #alertRoom {
+      font-size: 2.5rem;
+      color: red;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    #alertTimer {
+      font-size: 2rem;
+      color: black;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    #alertVideoPlayer {
+      width: 100%;
+      height: auto;
+      margin-top: 20px;
+    }
+  </style>
+  
+</head>
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!-- Menu -->
+      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+        <div class="app-brand demo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; height: auto; box-sizing: border-box;">
+          <a href="/" class="app-brand-link" style="display: flex; align-items: center; justify-content: center; width: 100%; max-width: 200px;">
+            <img src="{{ url_for('static', filename='/img/logo.png') }}" alt="Protect Care Logo" class="app-brand-logo demo" style="max-width: 90%;" />
+          </a>
+          <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large d-block d-xl-none">
+            <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
+          </a>
+        </div>
+        <ul class="menu-inner py-1">
+          <li class="menu-item">
+            <a href="/tables-basic" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+              <div class="text-truncate">Tableau de Bord</div>
+            </a>
+          </li>
+          <li class="menu-item active open">
+            <a href="/chambres" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-file"></i>
+              <div class="text-truncate">Chambres</div>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="/contact" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-envelope"></i>
+              <div class="text-truncate">Contact</div>
+            </a>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Modal for Alerts -->
+      <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="alertModalLabel">Nouvelle Alerte de Chute</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p id="alertRoom"></p>
+              <p id="alertTimer">00:00</p>
+              <!-- Video Player -->
+              <video id="alertVideoPlayer" controls>
+                <source id="alertVideoSource" src="" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id="markAsSeenButton" onclick="markAsSeen()">Vue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ajouter un élément audio pour le son d'alerte -->
+      <audio id="alertSound" src="{{ url_for('static', filename='/audio/alerte.mp3') }}" preload="auto"></audio>
+
+      <!-- Create Room Modal -->
+      <div class="modal fade" id="createRoomModal" tabindex="-1" aria-labelledby="createRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="createRoomModalLabel">Ajouter une Chambre</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="createRoomForm">
+                <div class="mb-3">
+                  <label for="roomNumber" class="form-label">Numéro de Chambre</label>
+                  <input type="text" class="form-control" id="roomNumber" required>
+                </div>
+                <div class="mb-3">
+                  <label for="floor" class="form-label">Étage</label>
+                  <input type="text" class="form-control" id="floor" required>
+                </div>
+                <div class="mb-3">
+                  <label for="type" class="form-label">Type</label>
+                  <select class="form-select" id="type" required>
+                    <option value="A risque">A risque</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Sans risque">Sans risque</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="raspberryId" class="form-label">ID Raspberry</label>
+                  <input type="text" class="form-control" id="raspberryId" required>
+                </div>
+                <div class="mb-3">
+                  <label for="occupied" class="form-label">Occupée</label>
+                  <select class="form-select" id="occupied" required>
+                    <option value="false">Non</option>
+                    <option value="true">Oui</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Ajouter</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Room Modal -->
+      <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editRoomModalLabel">Modifier une Chambre</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editRoomForm">
+                        <div class="mb-3">
+                            <label for="editRoomNumber" class="form-label">Numéro de Chambre</label>
+                            <input type="text" class="form-control" id="editRoomNumber" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editFloor" class="form-label">Étage</label>
+                            <input type="text" class="form-control" id="editFloor" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edittype" class="form-label">Type</label>
+                            <select class="form-select" id="editType" required>
+                              <option value="A risque">A risque</option>
+                              <option value="Normal">Normal</option>
+                              <option value="Sans risque">Sans risque</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRaspberryId" class="form-label">ID Raspberry</label>
+                            <input type="text" class="form-control" id="editRaspberryId" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editOccupied" class="form-label">Occupée</label>
+                            <select class="form-select" id="editOccupied" required>
+                                <option value="false">Non</option>
+                                <option value="true">Oui</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Modifier</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+      </div>
+
+
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        <!-- Navbar -->
+        <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme">
+          <div class="container-xxl">
+            <div class="navbar-nav-right d-flex align-items-center">
+              <ul class="navbar-nav flex-row align-items-center ms-auto">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <i class="bx bx-bell bx-sm"></i>
+                  </a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <i class="bx bx-user-circle bx-sm"></i> <!-- Corrected here -->
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">Déconnexion</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        
+        <!-- Content -->
+        <div class="container-xxl flex-grow-1 container-p-y">
+          <div class="d-flex justify-content-between mb-4">
+            <h4>Gestion des Chambres</h4>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoomModal">Ajouter une Chambre</button>
+
+          </div>
+
+          <div id="successMessage" class="alert alert-success d-none" role="alert">
+            Chambre ajoutée avec succès !
+          </div>
+
+          <!-- List of rooms -->
+          <div class="col-lg-12 mb-4">
+            <div class="card">
+              <h5 class="card-header">Liste des Chambres</h5>
+              <div class="table-responsive text-nowrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Chambre</th>
+                      <th>État</th>
+                      <th>Risques</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="roomsData">
+                    <!-- Data will be populated here through fetch -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      
+
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JS -->
+  <script src="{{ url_for('static', filename='vendor/libs/jquery/jquery.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/libs/popper/popper.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/js/bootstrap.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/js/menu.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchRooms();
+    });
+
+    function fetchRooms() {
+        fetch('{{ url_for("rooms_bp.get_rooms") }}')
+            .then(response => response.json())
+            .then(data => {
+                const roomsTable = document.getElementById('roomsData');
+                roomsTable.innerHTML = data.length === 0 ? '<tr><td colspan="4">No rooms available</td></tr>' : '';
+                data.forEach(room => {
+                    const stateBadge = room.occupied ? 'bg-label-danger' : 'bg-label-success';
+                    const stateText = room.occupied ? 'Occupied' : 'Available';
+                    const row = `<tr>
+                                <td><a href="/chambre/${room.room_number }">${room.room_number}</a></td>
+                                <td><span class="badge ${stateBadge}">${stateText}</span></td>
+                                <td>${room.type}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteRoom('${room.room_number}')">Delete</button>
+                                    <button class="btn btn-info btn-sm" onclick="updateRoom('${room.room_number}')">Modifier</button>
+                                </td>
+                            </tr>`;
+                    roomsTable.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching rooms:', error);
+                roomsTable.innerHTML = '<tr><td colspan="4">Failed to fetch data</td></tr>';
+            });
+    }
+
+    function deleteRoom(room_number) {
+        if (confirm(`Are you sure you want to delete room ${room_number}?`)) {
+            fetch(`/api/rooms/${room_number}`, {
+                method: 'DELETE',
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Room deleted successfully');
+                    fetchRooms(); // Refresh the list after deletion
+                } else {
+                    response.json().then(data => {
+                        alert(`Failed to delete room: ${data.error}`);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting room:', error);
+                alert('Error deleting room');
+            });
+        }
+    }
+
+    document.getElementById('createRoomForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const roomNumber = document.getElementById('roomNumber').value;
+        const floor = document.getElementById('floor').value;
+        const type = document.getElementById('type').value;
+        const raspberryId = document.getElementById('raspberryId').value;
+        const occupied = document.getElementById('occupied').value;
+
+        fetch('/api/rooms/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                room_number: roomNumber,
+                floor: floor,
+                type: type,
+                occupied: occupied === 'true',
+                raspberry_id: raspberryId,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                // Hide the modal
+                const createRoomModal = bootstrap.Modal.getInstance(document.getElementById('createRoomModal'));
+                if (createRoomModal) {
+                    createRoomModal.hide();
+                }
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+                // Show the success message
+                const successMessage = document.getElementById('successMessage');
+                successMessage.classList.remove('d-none');
+                successMessage.textContent = "Chambre ajoutée avec succès !";
+
+                
+                // Hide the success message after 3 seconds
+                setTimeout(() => {
+                    successMessage.classList.add('d-none');
+                }, 3000);
+
+                // Refresh the rooms list
+                fetchRooms();
+            } else {
+                console.error('Failed to create room');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+        // Reset form after submission
+        document.getElementById('createRoomForm').reset();
+    });
+
+    document.getElementById('createRoomModal').addEventListener('hidden.bs.modal', function () {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = 'auto';
+      document.body.style.paddingRight = '';
+    });
+
+
+
+    function updateRoom(room_number) {
+      // Fetch room details and populate the form
+      fetch(`/api/rooms/${room_number}`)
+          .then(response => response.json())
+          .then(data => {
+              // Populate the form fields with the current room data
+              document.getElementById('editRoomNumber').value = data.room_number;
+              document.getElementById('editFloor').value = data.floor;
+              document.getElementById('editType').value = data.type;  // Set the correct type
+              document.getElementById('editRaspberryId').value = data.raspberry_id;
+              document.getElementById('editOccupied').value = data.occupied ? 'true' : 'false';
+
+              // Show the modal
+              const editRoomModal = new bootstrap.Modal(document.getElementById('editRoomModal'));
+              editRoomModal.show();
+          })
+          .catch(error => {
+              console.error('Error fetching room data:', error);
+          });
+      }
+
+    // Handle form submission for updating the room
+    document.getElementById('editRoomForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const roomNumber = document.getElementById('editRoomNumber').value;
+        const floor = document.getElementById('editFloor').value;
+        const type = document.getElementById('editType').value;  // Get selected room type
+        const raspberryId = document.getElementById('editRaspberryId').value;
+        const occupied = document.getElementById('editOccupied').value;
+
+        // Update the room with new data
+        fetch(`/api/rooms/${roomNumber}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                room_number: roomNumber,
+                floor: floor,
+                type: type,
+                occupied: occupied === 'true',
+                raspberry_id: raspberryId,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                // Success message or refresh room list
+                alert('Room updated successfully');
+                const editRoomModal = bootstrap.Modal.getInstance(document.getElementById('editRoomModal'));
+                editRoomModal.hide();
+                fetchRooms(); // Refresh room list
+            } else {
+                console.error('Failed to update room');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+    
+    document.addEventListener("DOMContentLoaded", function () {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = "/";
+      }
+
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        window.location.href = "/";
+      });
+    });
+
+
+
+
+  </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+<script>
+  var socket = io('{{server_url}}', {
+    transports: ['websocket'],  // Forces WebSocket only
+    reconnection: true,
+    reconnectionAttempts: 5,    // Adjust this to suit your needs
+    reconnectionDelay: 2000     // Delay reconnection attempts to avoid flooding
+  });
+
+  // Listen for connection
+  socket.on('connect', function() {
+      console.log('Connected to SocketIO server');
+  });
+
+  // Listen for the 'notification' event
+  socket.on('notification', function(data) {
+      console.log('New incident received:', data);
+
+      const room = data.message.split("Room ")[1] || "Unknown";  // Extract room number
+      const videoUrl = data.video_url;  // Extract video URL
+
+      // Play the alert sound when a notification is received
+      var alertSound = document.getElementById('alertSound');
+      alertSound.play().catch(function() {
+        console.log('Lecture audio bloquée jusqu\'à une interaction utilisateur');
+      });
+
+      // Display the alert popup with the room number and video player
+      showAlertPopup(room, videoUrl);
+  });
+
+  // Listen for disconnection
+  socket.on('disconnect', function() {
+      console.log('Disconnected from SocketIO server');
+  });
+
+  var timerInterval;
+
+  // Function to show the alert popup
+  function showAlertPopup(room, videoUrl) {
+    document.getElementById('alertRoom').textContent = "Chambre " + room;
+    document.getElementById('alertVideoSource').src = videoUrl;
+    document.getElementById('alertVideoPlayer').load();  // Reload the video player with the new source
+    startTimer();
+
+    var alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+    alertModal.show();
+  }
+
+  // Function to start the timer
+  function startTimer() {
+    var timerDisplay = document.getElementById('alertTimer');
+    var seconds = 0;
+    timerInterval = setInterval(function() {
+      seconds++;
+      var minutes = Math.floor(seconds / 60);
+      var remainingSeconds = seconds % 60;
+      timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+
+  // Function to mark the alert as seen and stop the timer
+  function markAsSeen() {
+    clearInterval(timerInterval);
+    var alertModal = bootstrap.Modal.getInstance(document.getElementById('alertModal'));
+    alertModal.hide();
+
+    // Stop the alert sound
+    var alertSound = document.getElementById('alertSound');
+    alertSound.pause();
+    alertSound.currentTime = 0; // Reset the audio for the next alert
+  }
+</script>
+
+</body>
+
+</html>

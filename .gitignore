@@ -1,0 +1,6 @@
+myenv
+.env
+DockerFile
+routes/__pycache__/
+*.py[cod]
+*$py.class
